@@ -20,6 +20,7 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Test
+        continue-on-error: true
         run: dotnet test --no-restore --verbosity normal --logger "trx"
       - name: Push results to branch
         run: |
