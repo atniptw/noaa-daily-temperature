@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./app/StringLibrary
+        working-directory: ./app
     steps:
       - uses: actions/checkout@v3
       - name: Setup .NET Core SDK ${{ env.DOTNET_VERSION }}
