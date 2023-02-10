@@ -1,0 +1,32 @@
+name: GitHub Actions Demo
+run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+on: [workflow_dispatch]
+
+env:
+  DOTNET_VERSION: '7.0.x'
+
+jobs:
+  Demo-GitHub-Actions:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./app/StringLibrary
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET Core SDK ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal --logger "trx"
+      - name: Push results to branch
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add ./StringLibrary/TestResults
+          git commit -m "generated"
+          git push
