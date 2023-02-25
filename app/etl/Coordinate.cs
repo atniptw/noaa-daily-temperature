@@ -1,3 +1,3 @@
 namespace etl;
 
-public readonly record struct Coordinate(decimal lat, decimal lon);
+public readonly record struct Coordinate(double lat, double lon);

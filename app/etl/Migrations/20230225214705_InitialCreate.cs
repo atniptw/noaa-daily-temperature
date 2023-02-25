@@ -23,8 +23,8 @@ namespace etl.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     StationId = table.Column<string>(type: "TEXT", nullable: false),
                     RecordDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
-                    MaxTemperature = table.Column<decimal>(type: "TEXT", nullable: false),
-                    MinTemperature = table.Column<decimal>(type: "TEXT", nullable: false),
+                    MaxTemperature = table.Column<decimal>(type: "TEXT", nullable: true),
+                    MinTemperature = table.Column<decimal>(type: "TEXT", nullable: true),
                     Location = table.Column<Point>(type: "POINT", nullable: false)
                         .Annotation("Sqlite:Srid", 4326)
                 },
@@ -32,6 +32,12 @@ namespace etl.Migrations
                 {
                     table.PrimaryKey("PK_StationData", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StationData_StationId_RecordDate",
+                table: "StationData",
+                columns: new[] { "StationId", "RecordDate" },
+                unique: true);
         }
 
         /// <inheritdoc />

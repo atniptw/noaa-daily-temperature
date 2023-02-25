@@ -12,7 +12,7 @@ using etl;
 namespace etl.Migrations
 {
     [DbContext(typeof(WeatherContext))]
-    [Migration("20230225202919_InitialCreate")]
+    [Migration("20230225214705_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -32,10 +32,10 @@ namespace etl.Migrations
                         .HasColumnType("POINT")
                         .HasAnnotation("Sqlite:Srid", 4326);
 
-                    b.Property<decimal>("MaxTemperature")
+                    b.Property<decimal?>("MaxTemperature")
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("MinTemperature")
+                    b.Property<decimal?>("MinTemperature")
                         .HasColumnType("TEXT");
 
                     b.Property<DateOnly>("RecordDate")
@@ -46,6 +46,9 @@ namespace etl.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StationId", "RecordDate")
+                        .IsUnique();
 
                     b.ToTable("StationData");
                 });

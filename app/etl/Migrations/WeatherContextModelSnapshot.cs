@@ -29,10 +29,10 @@ namespace etl.Migrations
                         .HasColumnType("POINT")
                         .HasAnnotation("Sqlite:Srid", 4326);
 
-                    b.Property<decimal>("MaxTemperature")
+                    b.Property<decimal?>("MaxTemperature")
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("MinTemperature")
+                    b.Property<decimal?>("MinTemperature")
                         .HasColumnType("TEXT");
 
                     b.Property<DateOnly>("RecordDate")
@@ -43,6 +43,9 @@ namespace etl.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StationId", "RecordDate")
+                        .IsUnique();
 
                     b.ToTable("StationData");
                 });

@@ -31,17 +31,13 @@ public class WeatherContext : DbContext
     }
 }
 
+[Index(nameof(StationId), nameof(RecordDate), IsUnique = true)]
 public class StationDataPoint
 {
     public int Id { get; set; }
     public string StationId { get; set; }
     public DateOnly RecordDate { get; set; }
-    public decimal MaxTemperature { get; set; }
-    public decimal MinTemperature { get; set; }
+    public decimal? MaxTemperature { get; set; }
+    public decimal? MinTemperature { get; set; }
     public Point Location { get; set; }
-
-    // public int BlogId { get; set; }
-    // public string Url { get; set; }
-
-    // public List<Post> Posts { get; } = new();
 }
