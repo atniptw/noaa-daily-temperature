@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StringLibrary\StringLibrary.csproj" />
+    <ProjectReference Include="..\etl\etl.csproj" />
   </ItemGroup>
 
 </Project>

@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShowCase", "ShowCase\ShowCa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StringLibraryTest", "StringLibraryTest\StringLibraryTest.csproj", "{2B1E5E84-0970-4A98-B116-9A911A026407}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "etl", "etl\etl.csproj", "{A4A8ECA4-3DE3-4DBE-9804-1A28E3ADD250}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{2B1E5E84-0970-4A98-B116-9A911A026407}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B1E5E84-0970-4A98-B116-9A911A026407}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B1E5E84-0970-4A98-B116-9A911A026407}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4A8ECA4-3DE3-4DBE-9804-1A28E3ADD250}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4A8ECA4-3DE3-4DBE-9804-1A28E3ADD250}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4A8ECA4-3DE3-4DBE-9804-1A28E3ADD250}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4A8ECA4-3DE3-4DBE-9804-1A28E3ADD250}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
