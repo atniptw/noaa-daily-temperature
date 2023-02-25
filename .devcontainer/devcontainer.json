@@ -8,14 +8,15 @@
 		"ghcr.io/devcontainers/features/dotnet:1": {
 			"installUsingApt": true,
 			"version": "latest"
-		},
-		"ghcr.io/devcontainers/features/terraform:1": {
-			"installTerraformDocs": true,
-			"version": "latest",
-			"tflint": "latest",
-			"terragrunt": "latest"
 		}
-	}
+		// "ghcr.io/devcontainers/features/terraform:1": {
+		// 	"installTerraformDocs": true,
+		// 	"version": "latest",
+		// 	"tflint": "latest",
+		// 	"terragrunt": "latest"
+		// }
+	},
+	"postCreateCommand": "bash -c 'sudo apt-get update && sudo apt-get install -y libsqlite3-mod-spatialite libsqlite3-dev'"
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
