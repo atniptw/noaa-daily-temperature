@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace etl;
 
 public class StationParser
@@ -10,8 +12,8 @@ public class StationParser
         }
 
         var name = record[0..11];
-        var lat = decimal.Parse(record[12..20].Trim());
-        var lon = decimal.Parse(record[21..31].Trim());
+        var lat = decimal.Parse(record[12..20].Trim(), CultureInfo.InvariantCulture);
+        var lon = decimal.Parse(record[21..31].Trim(), CultureInfo.InvariantCulture);
 
         return new KeyValuePair<string, Coordinate>(name, new Coordinate(lat, lon));
     }
