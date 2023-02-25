@@ -10,8 +10,8 @@ var stations = parser.ParseStationList(rawStationList);
 Console.WriteLine($"Loaded {stations.Count} stations");
 
 var weatherDataFileName = Path.Combine(Directory.GetCurrentDirectory(), "../../data/2023.csv");
-var reader = new DailyWeatherReader();
-reader.ReadWeatherData(weatherDataFileName, r => Console.WriteLine(r));
+using var reader = new DailyWeatherReader(weatherDataFileName);
+var records = reader.ReadWeatherData();
 
 
 // Merge with stations

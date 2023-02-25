@@ -4,9 +4,13 @@ using CsvHelper.Configuration;
 
 namespace etl;
 
-public class DailyWeatherReader
+public class DailyWeatherReader : IDisposable
 {
-    public void ReadWeatherData(string fileName, Action<DailyStationRecord> action)
+    private bool disposedValue;
+    private readonly StreamReader reader;
+    private readonly CsvReader csv;
+
+    public DailyWeatherReader(string fileName)
     {
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
@@ -14,16 +18,34 @@ public class DailyWeatherReader
             ShouldSkipRecord = (args) => !args.Row[2].Equals("TMAX") && !args.Row[2].Equals("TMIN")
         };
 
-        using (var reader = new StreamReader(fileName))
-        using (var csv = new CsvReader(reader, config))
-        {
-            csv.Context.RegisterClassMap<DailyStationRecordMap>();
-            var records = csv.GetRecords<DailyStationRecord>();
+        reader = new StreamReader(fileName);
+        csv = new CsvReader(reader, config);
+        csv.Context.RegisterClassMap<DailyStationRecordMap>();
+    }
 
-            foreach (var record in records)
+    public IEnumerable<DailyStationRecord> ReadWeatherData()
+    {
+        return csv.GetRecords<DailyStationRecord>();
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
             {
-                action(record);
+                csv.Dispose();
+                reader.Dispose();
             }
+
+            disposedValue = true;
         }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }
