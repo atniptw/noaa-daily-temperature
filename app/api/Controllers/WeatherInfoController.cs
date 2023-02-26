@@ -26,8 +26,8 @@ public class WeatherInfoController : ControllerBase
     public IEnumerable<WeatherInfo> Get(string date, double latitude, double longitude)
     {
         using var db = new WeatherContext();
-        var dataPoints = db.StationData.FromSql($"select * from StationData where RecordDate={date} and PtDistWithin(MakePoint({longitude}, {latitude}, 4326), Location, 48000) order by ST_Distance(MakePoint({longitude}, {latitude}, 4326), Location) ASC").ToList();
+        var dataPoints = db.StationData.FromSql($"select *, GreatCircleLength(MakeLine(Location, MakePoint({longitude}, {latitude}, 4326))) as DistanceFromTarget from StationData where RecordDate={date} and PtDistWithin(MakePoint({longitude}, {latitude}, 4326), Location, 48000) order by ST_Distance(MakePoint({longitude}, {latitude}, 4326), Location) ASC").ToList();
         return dataPoints
-            .Select(x => new WeatherInfo { Date = x.RecordDate, StationName = x.StationName, IsSus = x.SusStation, HighTemperatureC = x.MaxTemperature, LowTemperatureC = x.MinTemperature });
+            .Select(x => new WeatherInfo { Date = x.RecordDate, StationName = x.StationName, IsSus = x.SusStation, HighTemperatureC = x.MaxTemperature, LowTemperatureC = x.MinTemperature, DistanceFromTarget = x.DistanceFromTarget });
     }
 }

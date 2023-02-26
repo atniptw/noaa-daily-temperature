@@ -42,4 +42,5 @@ public class StationDataPoint
     public decimal? MaxTemperature { get; set; }
     public decimal? MinTemperature { get; set; }
     public Point Location { get; set; }
+    public decimal DistanceFromTarget { get; set; }
 }
