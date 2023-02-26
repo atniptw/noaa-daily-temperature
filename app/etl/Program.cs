@@ -24,31 +24,72 @@ int count = 0;
 Stopwatch timer = new Stopwatch();
 timer.Start();
 var transaction = db.Database.BeginTransaction();
-foreach (var record in records)
+
+var currentRecord = records.GetEnumerator();
+var enumeratorStatus = currentRecord.MoveNext();
+
+while (enumeratorStatus)
 {
     FormattableString query;
 
+    var record = currentRecord.Current;
     var temperature = decimal.Parse(record.recordValue) / 10m;
     var station = stations[record.stationId];
     var location = new Point(station.lon, station.lat) { SRID = 4326 };
 
-    if (record.recordType.Equals("TMAX", StringComparison.Ordinal))
+    var oldRecordType = record.recordType;
+    enumeratorStatus = currentRecord.MoveNext();
+    var nextRecord = currentRecord.Current;
+
+    // Take advantage of the reality that the data is sorted when we did it, so we can not worry about conflicts
+    // and merge data from adjacent lines into a single insert in the common case
+    if (enumeratorStatus && nextRecord.stationId == record.stationId && nextRecord.date == record.date && !nextRecord.recordType.Equals(oldRecordType))
     {
+        decimal maxTemperature;
+        decimal minTemperature;
+        // Insert both
+        if (record.recordType.Equals("TMAX", StringComparison.Ordinal) && nextRecord.recordType.Equals("TMIN"))
+        {
+            maxTemperature = temperature;
+            minTemperature = decimal.Parse(nextRecord.recordValue) / 10m;
+        }
+        else if (record.recordType.Equals("TMIN", StringComparison.Ordinal) && nextRecord.recordType.Equals("TMAX"))
+        {
+            minTemperature = temperature;
+            maxTemperature = decimal.Parse(nextRecord.recordValue) / 10m;
+        }
+        else
+        {
+            continue;
+        }
         query = $@"
-        INSERT INTO StationData (StationId, StationName, SusStation, RecordDate, MaxTemperature, Location)
-        VALUES ({record.stationId}, {station.name}, {station.isSus}, {record.date}, {temperature}, {location})
-        ON CONFLICT (StationId, RecordDate) DO UPDATE SET MaxTemperature={temperature};";
-    }
-    else if (record.recordType.Equals("TMIN", StringComparison.Ordinal))
-    {
-        query = $@"
-        INSERT INTO StationData (StationId, StationName, SusStation, RecordDate, MinTemperature, Location)
-        VALUES ({record.stationId}, {station.name}, {station.isSus}, {record.date}, {temperature}, {location})
-        ON CONFLICT (StationId, RecordDate) DO UPDATE SET MinTemperature={temperature};";
+        INSERT INTO StationData (StationId, StationName, SusStation, RecordDate, MaxTemperature, MinTemperature, Location)
+        VALUES ({record.stationId}, {station.name}, {station.isSus}, {record.date}, {maxTemperature}, {minTemperature}, {location})
+        ";
+        enumeratorStatus = currentRecord.MoveNext();
+
     }
     else
     {
-        continue;
+        // Insert just one
+        if (record.recordType.Equals("TMAX", StringComparison.Ordinal))
+        {
+            query = $@"
+        INSERT INTO StationData (StationId, StationName, SusStation, RecordDate, MaxTemperature, Location)
+        VALUES ({record.stationId}, {station.name}, {station.isSus}, {record.date}, {temperature}, {location})
+        ";
+        }
+        else if (record.recordType.Equals("TMIN", StringComparison.Ordinal))
+        {
+            query = $@"
+        INSERT INTO StationData (StationId, StationName, SusStation, RecordDate, MinTemperature, Location)
+        VALUES ({record.stationId}, {station.name}, {station.isSus}, {record.date}, {temperature}, {location})
+        ";
+        }
+        else
+        {
+            continue;
+        }
     }
 
     db.Database.ExecuteSql(query);
