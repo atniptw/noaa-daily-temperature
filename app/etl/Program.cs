@@ -41,8 +41,8 @@ while (enumeratorStatus)
     enumeratorStatus = currentRecord.MoveNext();
     var nextRecord = currentRecord.Current;
 
-    // Take advantage of the reality that the data is sorted when we did it, so we can not worry about conflicts
-    // and merge data from adjacent lines into a single insert in the common case
+    // Take advantage of the reality that the data is sorted when we get it, so we can merge
+    // data from adjacent lines into a single insert if a station provides both TMIN and TMAX
     if (enumeratorStatus && nextRecord.stationId == record.stationId && nextRecord.date == record.date && !nextRecord.recordType.Equals(oldRecordType))
     {
         decimal maxTemperature;
