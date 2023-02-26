@@ -1,4 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using System.Diagnostics;
 using etl;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
@@ -19,6 +20,10 @@ using var db = new WeatherContext();
 db.Database.Migrate();
 Console.WriteLine($"Database path: {db.DbPath}.");
 
+int count = 0;
+Stopwatch timer = new Stopwatch();
+timer.Start();
+var transaction = db.Database.BeginTransaction();
 foreach (var record in records)
 {
     FormattableString query;
@@ -46,7 +51,19 @@ foreach (var record in records)
         continue;
     }
 
-    // db.Database.ExecuteSql(query);
+    db.Database.ExecuteSql(query);
+
+    count++;
+    int interval = 1000;
+    if (count % interval == 0)
+    {
+        transaction.Commit();
+        transaction.Dispose();
+        timer.Stop();
+        Console.WriteLine($"Upserted {count} records, {timer.ElapsedMilliseconds}ms per {interval}");
+        timer.Restart();
+        transaction = db.Database.BeginTransaction();
+    }
 }
 
 Console.WriteLine($"{db.StationData.Count()} records found");
