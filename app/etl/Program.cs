@@ -71,20 +71,20 @@ while (enumeratorStatus)
     }
     else
     {
-        // Insert just one
+        // Insert just one, with conflict logic just in case
         if (record.recordType.Equals("TMAX", StringComparison.Ordinal))
         {
             query = $@"
         INSERT INTO StationData (StationId, StationName, SusStation, RecordDate, MaxTemperature, Location)
         VALUES ({record.stationId}, {station.name}, {station.isSus}, {record.date}, {temperature}, {location})
-        ";
+        ON CONFLICT (StationId, RecordDate) DO UPDATE SET MaxTemperature={temperature};";
         }
         else if (record.recordType.Equals("TMIN", StringComparison.Ordinal))
         {
             query = $@"
         INSERT INTO StationData (StationId, StationName, SusStation, RecordDate, MinTemperature, Location)
         VALUES ({record.stationId}, {station.name}, {station.isSus}, {record.date}, {temperature}, {location})
-        ";
+        ON CONFLICT (StationId, RecordDate) DO UPDATE SET MinTemperature={temperature};";
         }
         else
         {
