@@ -12,7 +12,7 @@ using etl;
 namespace etl.Migrations
 {
     [DbContext(typeof(WeatherContext))]
-    [Migration("20230225214705_InitialCreate")]
+    [Migration("20230226163503_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -44,6 +44,13 @@ namespace etl.Migrations
                     b.Property<string>("StationId")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("StationName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("SusStation")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

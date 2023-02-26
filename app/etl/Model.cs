@@ -36,6 +36,8 @@ public class StationDataPoint
 {
     public int Id { get; set; }
     public string StationId { get; set; }
+    public string StationName { get; set; }
+    public bool SusStation { get; set; }
     public DateOnly RecordDate { get; set; }
     public decimal? MaxTemperature { get; set; }
     public decimal? MinTemperature { get; set; }

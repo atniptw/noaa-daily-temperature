@@ -22,6 +22,8 @@ namespace etl.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     StationId = table.Column<string>(type: "TEXT", nullable: false),
+                    StationName = table.Column<string>(type: "TEXT", nullable: false),
+                    SusStation = table.Column<bool>(type: "INTEGER", nullable: false),
                     RecordDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
                     MaxTemperature = table.Column<decimal>(type: "TEXT", nullable: true),
                     MinTemperature = table.Column<decimal>(type: "TEXT", nullable: true),

@@ -1,3 +1,4 @@
+using System.Globalization;
 using etl;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UtilityLibraries;
@@ -7,22 +8,25 @@ namespace StringLibraryTest;
 [TestClass]
 public class StationParserTest
 {
-    [DataRow("AE000041196  25.3330   55.5170   34.0    SHARJAH INTER. AIRP            GSN     41196", "AE000041196", "25.3330", "55.5170")]
-    [DataRow("ACW00011604  17.1167  -61.7833   10.1    ST JOHNS COOLIDGE FLD                       ", "ACW00011604", "17.1167", "-61.7833")]
-    [DataRow("AR000087692 -37.9330  -57.5830   22.0    MAR DEL PLATA AERO             GSN     87692", "AR000087692", "-37.9330", "-57.5830")]
-    [DataRow("ASN00006105 -25.8925  113.5772   33.8    SHARK BAY AIRPORT                      95402", "ASN00006105", "-25.8925", "113.5772")]
-    [DataRow("US1COWE0394  40.6124 -103.9590 1500.2 CO NEW RAYMER 9.4 W                            ", "US1COWE0394", "40.6124", "-103.9590")]
-    [DataRow("VE000080425   9.8170  -70.9330   28.0    MENE GRANDE                    GSN     80425", "VE000080425", "9.8170",  "-70.9330")]
+    [DataRow("AE000041196  25.3330   55.5170   34.0    SHARJAH INTER. AIRP            GSN     41196", "AE000041196", "25.3330", "55.5170", "34.0", "SHARJAH INTER. AIRP", false)]
+    [DataRow("ACW00011604  17.1167  -61.7833   10.1    ST JOHNS COOLIDGE FLD                       ", "ACW00011604", "17.1167", "-61.7833", "10.1", "ST JOHNS COOLIDGE FLD", true)]
+    [DataRow("AR000087692 -37.9330  -57.5830   22.0    MAR DEL PLATA AERO             GSN     87692", "AR000087692", "-37.9330", "-57.5830", "22.0", "MAR DEL PLATA AERO", false)]
+    [DataRow("ASN00006105 -25.8925  113.5772   33.8    SHARK BAY AIRPORT                      95402", "ASN00006105", "-25.8925", "113.5772", "33.8", "SHARK BAY AIRPORT", false)]
+    [DataRow("US1COWE0394  40.6124 -103.9590 1500.2 CO NEW RAYMER 9.4 W                            ", "US1COWE0394", "40.6124", "-103.9590", "1500.2", "NEW RAYMER 9.4 W", true)]
+    [DataRow("VE000080425   9.8170  -70.9330   28.0    MENE GRANDE                    GSN     80425", "VE000080425", "9.8170", "-70.9330", "28.0", "MENE GRANDE", false)]
+    [DataRow("USW00093805  30.3975  -84.3289   53.9 FL TALLAHASSEE                        HCN 72214", "USW00093805", "30.3975", "-84.3289", "53.9", "TALLAHASSEE", false)]
+    [DataRow("USW00093784  39.2814  -76.6111    6.1 MD MARYLAND SCI CTR                   HCN      ", "USW00093784", "39.2814", "-76.6111", "6.1", "MARYLAND SCI CTR", false)]
+    [DataRow("ZZZZZZZZZZZ -40.6124 -103.9591 1500.2 YY ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ GSN HCN 00000", "ZZZZZZZZZZZ", "-40.6124", "-103.9591", "1500.2", "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ", false)]
     [DataTestMethod]
-    public void ShouldParseRecord(string input, string name, string lat, string lon)
+    public void ShouldParseRecord(string input, string id, string lat, string lon, string elevation, string name, bool isSus)
     {
-        var expectedCoordinate = new Coordinate(decimal.Parse(lat), decimal.Parse(lon));
+        var expectedStationInfo = new StationInfo(double.Parse(lat, CultureInfo.InvariantCulture), double.Parse(lon, CultureInfo.InvariantCulture), double.Parse(elevation, CultureInfo.InvariantCulture), name, isSus);
 
         var parser = new StationParser();
         var result = parser.ParseRecord(input);
 
-        Assert.AreEqual(name, result.Key);
-        Assert.AreEqual(expectedCoordinate, result.Value);
+        Assert.AreEqual(id, result.Key);
+        Assert.AreEqual(expectedStationInfo, result.Value);
     }
 
     [TestMethod]
@@ -38,6 +42,6 @@ VEM00080407  10.5580  -71.7280   71.6    LA CHINITA INTL                        
         var result = parser.ParseStationList(stationList);
 
         Assert.AreEqual(4, result.Count);
-        Assert.AreEqual(new Coordinate(10.5580m, -71.7280m), result["VEM00080407"]);
+        Assert.AreEqual(new StationInfo(10.5580, -71.7280, 71.6, "LA CHINITA INTL", false), result["VEM00080407"]);
     }
 }

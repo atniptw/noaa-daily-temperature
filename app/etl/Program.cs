@@ -29,21 +29,21 @@ foreach (var record in records)
     FormattableString query;
 
     var temperature = decimal.Parse(record.recordValue) / 10m;
-    var coord = stations[record.stationId];
-    var location = new Point(coord.lon, coord.lat) { SRID = 4326 };
+    var station = stations[record.stationId];
+    var location = new Point(station.lon, station.lat) { SRID = 4326 };
 
     if (record.recordType.Equals("TMAX", StringComparison.Ordinal))
     {
         query = $@"
-        INSERT INTO StationData (StationId, RecordDate, MaxTemperature, Location)
-        VALUES ({record.stationId}, {record.date}, {temperature}, {location})
+        INSERT INTO StationData (StationId, StationName, SusStation, RecordDate, MaxTemperature, Location)
+        VALUES ({record.stationId}, {station.name}, {station.isSus}, {record.date}, {temperature}, {location})
         ON CONFLICT (StationId, RecordDate) DO UPDATE SET MaxTemperature={temperature};";
     }
     else if (record.recordType.Equals("TMIN", StringComparison.Ordinal))
     {
         query = $@"
-        INSERT INTO StationData (StationId, RecordDate, MinTemperature, Location)
-        VALUES ({record.stationId}, {record.date}, {temperature}, {location})
+        INSERT INTO StationData (StationId, StationName, SusStation, RecordDate, MinTemperature, Location)
+        VALUES ({record.stationId}, {station.name}, {station.isSus}, {record.date}, {temperature}, {location})
         ON CONFLICT (StationId, RecordDate) DO UPDATE SET MinTemperature={temperature};";
     }
     else
