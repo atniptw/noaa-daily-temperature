@@ -26,7 +26,7 @@ runs:
     - uses: hashicorp/setup-terraform@v2
       with:
         terraform_version: ${{ inputs.terraform_version }}
-        # terraform_wrapper: false
+        terraform_wrapper: false
 
     - name: Terraform fmt
       id: fmt
