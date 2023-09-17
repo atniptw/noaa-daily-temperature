@@ -22,15 +22,15 @@ jobs:
         steps:
         - uses: actions/checkout@v3
 
-        - uses: azure/login@v1
-          with:
-            creds: ${{ secrets.AZURE_CREDENTIALS }}
-
         - name: Terraform Plan
           uses: ./.github/actions/plan
           with:
             terraform_version: ${{ env.TERRAFORM_VERSION }}
             terraform_directory: ${{ vars.TERRAFORM_DIRECTORY }}
+            client_id: ${{ vars.ARM_CLIENT_ID }}
+            client_secret: ${{ secrets.ARM_CLIENT_SECRET }}
+            tenant_id: ${{ vars.ARM_TENANT_ID }}
+            subscription_id: ${{ vars.ARM_SUBSCRIPTION_ID }}
 
 
     Terraform-Apply:
@@ -44,12 +44,12 @@ jobs:
         steps:
         - uses: actions/checkout@v3
 
-        - uses: azure/login@v1
-          with:
-            creds: ${{ secrets.AZURE_CREDENTIALS }}
-
         - name: Terraform Plan
           uses: ./.github/actions/apply
           with:
             terraform_version: ${{ env.TERRAFORM_VERSION }}
             terraform_directory: ${{ vars.TERRAFORM_DIRECTORY }}
+            client_id: ${{ vars.ARM_CLIENT_ID }}
+            client_secret: ${{ secrets.ARM_CLIENT_SECRET }}
+            tenant_id: ${{ vars.ARM_TENANT_ID }}
+            subscription_id: ${{ vars.ARM_SUBSCRIPTION_ID }}
