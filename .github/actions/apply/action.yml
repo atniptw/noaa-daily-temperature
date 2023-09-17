@@ -34,13 +34,15 @@ runs:
       shell: bash
       working-directory: ${{ inputs.terraform_directory }}
 
+    - name: Export Azure Login Credentials
+      run: |
+        echo "ARM_CLIENT_ID=${{ inputs.client_id }}" >> $GITHUB_ENV
+        echo "ARM_CLIENT_SECRET=${{ inputs.client_secret }}" >> $GITHUB_ENV
+        echo "ARM_SUBSCRIPTION_ID=${{ inputs.subscription_id }}" >> $GITHUB_ENV
+        echo "ARM_TENANT_ID=${{ inputs.tenant_id }}" >> $GITHUB_ENV
+
     - name: Terraform Apply
       id: apply
       run: terraform apply -no-color -auto-approve
       shell: bash
       working-directory: ${{ inputs.terraform_directory }}
-      env:
-        ARM_CLIENT_ID: ${{ inputs.client_id }}
-        ARM_CLIENT_SECRET: ${{ inputs.client_secret }}
-        ARM_TENANT_ID: ${{ inputs.tenant_id }}
-        ARM_SUBSCRIPTION_ID: ${{ inputs.subscription_id }}
