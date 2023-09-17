@@ -1,6 +1,9 @@
 name: 'Terraform Plan'
 description: ''
 inputs:
+  terraform_directory:
+    description: ''
+    required: true
   terraform_version:
     description: ''
     required: true
@@ -16,17 +19,25 @@ runs:
     - name: Terraform fmt
       id: fmt
       run: terraform fmt -check -recursive
+      shell: bash
+      working-directory: ${{ inputs.terraform_directory }}
       continue-on-error: true
+
 
     - name: Terraform Init
       id: init
       run: terraform init
+      shell: bash
+      working-directory: ${{ inputs.terraform_directory }}
 
     - name: Terraform Validate
       id: validate
       run: terraform validate -no-color
+      shell: bash
+      working-directory: ${{ inputs.terraform_directory }}
 
     - name: Terraform Plan
       id: plan
       run: terraform plan -no-color
-      continue-on-error: true
+      shell: bash
+      working-directory: ${{ inputs.terraform_directory }}

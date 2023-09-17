@@ -31,6 +31,7 @@ jobs:
           uses: ./.github/actions/plan
           with:
             terraform_version: ${{ env.TERRAFORM_VERSION }}
+            terraform_directory: ${{ env.TERRAFORM_DIRECTORY }}
 
 
     Terraform-Apply:
@@ -52,3 +53,4 @@ jobs:
           uses: ./.github/actions/apply
           with:
             terraform_version: ${{ env.TERRAFORM_VERSION }}
+            terraform_directory: ${{ env.TERRAFORM_DIRECTORY }}

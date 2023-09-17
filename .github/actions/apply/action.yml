@@ -22,8 +22,11 @@ runs:
     - name: Terraform Init
       id: init
       run: terraform init
+      shell: bash
+      working-directory: ${{ inputs.terraform_directory }}
 
     - name: Terraform Plan
       id: plan
       run: terraform apply -no-color -auto-approve
-      continue-on-error: true
+      shell: bash
+      working-directory: ${{ inputs.terraform_directory }}
