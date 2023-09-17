@@ -1,0 +1,29 @@
+name: 'Terraform Apply'
+description: ''
+inputs:
+  terraform_directory:
+    description: ''
+    required: true
+  terraform_version:
+    description: ''
+    required: true
+  output_filename:
+    description: ''
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: ${{ inputs.terraform_version }}
+        # terraform_wrapper: false
+
+    - name: Terraform Init
+      id: init
+      run: terraform init
+
+    - name: Terraform Plan
+      id: plan
+      run: terraform apply -no-color -auto-approve
+      continue-on-error: true

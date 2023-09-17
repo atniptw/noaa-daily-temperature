@@ -1,0 +1,32 @@
+name: 'Terraform Plan'
+description: ''
+inputs:
+  terraform_version:
+    description: ''
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: ${{ inputs.terraform_version }}
+        # terraform_wrapper: false
+
+    - name: Terraform fmt
+      id: fmt
+      run: terraform fmt -check -recursive
+      continue-on-error: true
+
+    - name: Terraform Init
+      id: init
+      run: terraform init
+
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color
+
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -no-color
+      continue-on-error: true

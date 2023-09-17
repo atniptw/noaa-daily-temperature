@@ -1,0 +1,54 @@
+name: Deploy Infrastructure
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - main
+        paths:
+            - infra/**
+
+env:
+    TERRAFORM_VERSION: '1.5.6'
+    TERRAFORM_DIRECTORY: './infra'
+
+jobs:
+    Terraform-Plan:
+        runs-on: ubuntu-latest
+        environment: dev
+        defaults:
+            run:
+                shell: bash
+                working-directory: ${{ env.TERRAFORM_DIRECTORY }}
+
+        steps:
+        - uses: actions/checkout@v3
+
+        - uses: azure/login@v1
+          with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+        - name: Terraform Plan
+          uses: ./.github/actions/plan
+          with:
+            terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+
+    Terraform-Apply:
+        needs: Terraform-Plan
+        runs-on: ubuntu-latest
+        environment: dev
+        defaults:
+            run:
+                shell: bash
+                working-directory: ${{ env.TERRAFORM_DIRECTORY }}
+        steps:
+        - uses: actions/checkout@v3
+
+        - uses: azure/login@v1
+          with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+        - name: Terraform Plan
+          uses: ./.github/actions/apply
+          with:
+            terraform_version: ${{ env.TERRAFORM_VERSION }}
