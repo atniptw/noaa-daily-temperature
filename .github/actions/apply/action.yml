@@ -28,12 +28,6 @@ runs:
         terraform_version: ${{ inputs.terraform_version }}
         terraform_wrapper: false
 
-    - name: Terraform Init
-      id: init
-      run: terraform init
-      shell: bash
-      working-directory: ${{ inputs.terraform_directory }}
-
     - name: Export Azure Login Credentials
       run: |
         echo "ARM_CLIENT_ID=${{ inputs.client_id }}" >> $GITHUB_ENV
@@ -41,6 +35,12 @@ runs:
         echo "ARM_SUBSCRIPTION_ID=${{ inputs.subscription_id }}" >> $GITHUB_ENV
         echo "ARM_TENANT_ID=${{ inputs.tenant_id }}" >> $GITHUB_ENV
       shell: bash
+
+    - name: Terraform Init
+      id: init
+      run: terraform init
+      shell: bash
+      working-directory: ${{ inputs.terraform_directory }}
 
     - name: Terraform Apply
       id: apply
