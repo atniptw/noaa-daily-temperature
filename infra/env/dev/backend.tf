@@ -5,6 +5,12 @@ terraform {
       version = "=3.73.0"
     }
   }
+  backend "azurerm" {
+    resource_group_name  = "dev-rg-noaa"
+    storage_account_name = "devstnoaa01"
+    container_name       = "tfstate"
+    key                  = "terraform.tfstate"
+  }
 }
 
 # Configure the Microsoft Azure Provider
