@@ -9,7 +9,6 @@ on:
 
 env:
     TERRAFORM_VERSION: '1.5.6'
-    TERRAFORM_DIRECTORY: './infra'
 
 jobs:
     Terraform-Plan:
@@ -18,7 +17,7 @@ jobs:
         defaults:
             run:
                 shell: bash
-                working-directory: ${{ env.TERRAFORM_DIRECTORY }}
+                working-directory: ${{ vars.TERRAFORM_DIRECTORY }}
 
         steps:
         - uses: actions/checkout@v3
@@ -31,7 +30,7 @@ jobs:
           uses: ./.github/actions/plan
           with:
             terraform_version: ${{ env.TERRAFORM_VERSION }}
-            terraform_directory: ${{ env.TERRAFORM_DIRECTORY }}
+            terraform_directory: ${{ vars.TERRAFORM_DIRECTORY }}
 
 
     Terraform-Apply:
@@ -41,7 +40,7 @@ jobs:
         defaults:
             run:
                 shell: bash
-                working-directory: ${{ env.TERRAFORM_DIRECTORY }}
+                working-directory: ${{ vars.TERRAFORM_DIRECTORY }}
         steps:
         - uses: actions/checkout@v3
 
@@ -53,4 +52,4 @@ jobs:
           uses: ./.github/actions/apply
           with:
             terraform_version: ${{ env.TERRAFORM_VERSION }}
-            terraform_directory: ${{ env.TERRAFORM_DIRECTORY }}
+            terraform_directory: ${{ vars.TERRAFORM_DIRECTORY }}
