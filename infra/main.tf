@@ -40,8 +40,8 @@ resource "azurerm_key_vault" "kv" {
   }
 
   access_policy {
-    tenant_id = azurerm_data_factory.factory.identity.tenant_id
-    object_id = azurerm_data_factory.factory.identity.principal_id
+    tenant_id = azurerm_data_factory.factory.identity[0].tenant_id
+    object_id = azurerm_data_factory.factory.identity[0].principal_id
 
     key_permissions = [
       "Get",
