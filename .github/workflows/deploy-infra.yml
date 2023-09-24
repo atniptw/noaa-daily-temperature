@@ -44,7 +44,7 @@ jobs:
         steps:
         - uses: actions/checkout@v3
 
-        - name: Terraform Plan
+        - name: Terraform Apply
           uses: ./.github/actions/apply
           with:
             terraform_version: ${{ env.TERRAFORM_VERSION }}

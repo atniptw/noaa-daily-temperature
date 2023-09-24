@@ -41,3 +41,6 @@ data/
 
 # Unit Test Results
 TestResults/
+
+# Terroaform
+.terraform
