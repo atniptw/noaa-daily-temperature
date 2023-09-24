@@ -56,6 +56,8 @@ resource "azurerm_key_vault" "kv" {
       "Get",
     ]
   }
+
+  depends_on = [ azurerm_data_factory.factory ]
 }
 
 resource "azurerm_data_factory" "factory" {
