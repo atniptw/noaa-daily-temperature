@@ -6,4 +6,5 @@ module "infra" {
   source = "../../"
 
   resource_group = local.resource_group
+  environment    = "dev"
 }

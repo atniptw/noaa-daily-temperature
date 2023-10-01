@@ -57,7 +57,7 @@ resource "azurerm_key_vault" "kv" {
     ]
   }
 
-  depends_on = [ azurerm_data_factory.factory ]
+  depends_on = [azurerm_data_factory.factory]
 }
 
 resource "azurerm_data_factory" "factory" {
@@ -86,4 +86,22 @@ resource "azurerm_cosmosdb_account" "db" {
     location          = data.azurerm_resource_group.rg.location
     failover_priority = 0
   }
+}
+
+resource "azurerm_storage_account" "st" {
+  name                     = "devstnoaa"
+  location                 = data.azurerm_resource_group.rg.location
+  resource_group_name      = data.azurerm_resource_group.rg.name
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+
+  tags = {
+    environment = var.environment
+  }
+}
+
+resource "azurerm_role_assignment" "example" {
+  scope                = azurerm_storage_account.st.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_data_factory.factory.identity[0].principal_id
 }
