@@ -111,3 +111,9 @@ resource "azurerm_storage_container" "example" {
   storage_account_name  = azurerm_storage_account.st.name
   container_access_type = "private"
 }
+
+resource "azurerm_data_factory_linked_service_azure_blob_storage" "ghcn" {
+  name              = "ghcn"
+  data_factory_id   = azurerm_data_factory.factory.id
+  connection_string = data.azurerm_storage_account.st.primary_connection_string
+}
