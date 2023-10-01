@@ -107,7 +107,7 @@ resource "azurerm_role_assignment" "example" {
 }
 
 resource "azurerm_storage_container" "example" {
-  name                  = "2023"
+  name                  = "GHCN"
   storage_account_name  = azurerm_storage_account.st.name
   container_access_type = "private"
 }
