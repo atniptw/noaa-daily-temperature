@@ -89,7 +89,7 @@ resource "azurerm_cosmosdb_account" "db" {
 }
 
 resource "azurerm_storage_account" "st" {
-  name                     = "devstnoaa"
+  name                     = "devstnoaa02"
   location                 = data.azurerm_resource_group.rg.location
   resource_group_name      = data.azurerm_resource_group.rg.name
   account_tier             = "Standard"
