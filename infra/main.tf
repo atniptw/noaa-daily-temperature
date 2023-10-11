@@ -40,8 +40,8 @@ resource "azurerm_key_vault" "kv" {
   }
 
   access_policy {
-    tenant_id = azurerm_data_factory.factory.identity[0].tenant_id
-    object_id = azurerm_data_factory.factory.identity[0].principal_id
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = module.data_factory.identity
 
     key_permissions = [
       "Get",
@@ -57,17 +57,7 @@ resource "azurerm_key_vault" "kv" {
     ]
   }
 
-  depends_on = [azurerm_data_factory.factory]
-}
-
-resource "azurerm_data_factory" "factory" {
-  name                = "devadfnoaa"
-  location            = data.azurerm_resource_group.rg.location
-  resource_group_name = data.azurerm_resource_group.rg.name
-
-  identity {
-    type = "SystemAssigned"
-  }
+  depends_on = [module.data_factory]
 }
 
 resource "azurerm_cosmosdb_account" "db" {
@@ -103,17 +93,19 @@ resource "azurerm_storage_account" "st" {
 resource "azurerm_role_assignment" "example" {
   scope                = azurerm_storage_account.st.id
   role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_data_factory.factory.identity[0].principal_id
+  principal_id         = module.data_factory.identity
 }
 
-resource "azurerm_storage_container" "example" {
+resource "azurerm_storage_container" "ghcn" {
   name                  = "ghcn"
   storage_account_name  = azurerm_storage_account.st.name
   container_access_type = "private"
 }
 
-resource "azurerm_data_factory_linked_service_azure_blob_storage" "ghcn" {
-  name              = "ghcn"
-  data_factory_id   = azurerm_data_factory.factory.id
-  connection_string = azurerm_storage_account.st.primary_connection_string
+module "data_factory" {
+  source = "./modules/data_factory"
+
+  location                          = data.azurerm_resource_group.rg.location
+  resource_group_name               = data.azurerm_resource_group.rg.name
+  storage_account_connection_string = azurerm_storage_account.st.primary_connection_string
 }
