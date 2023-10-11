@@ -34,6 +34,10 @@ resource "azurerm_data_factory_dataset_http" "ghcn" {
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_web.ghcn.name
 
-  relative_url   = "/pub/data/ghcn/daily/by_year/"
+  relative_url   = "@concat('/pub/data/ghcn/daily/by_year/', dataset().year)"
   request_method = "GET"
+
+  parameters = {
+    "year" = "2023"
+  }
 }
