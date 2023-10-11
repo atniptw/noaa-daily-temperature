@@ -14,3 +14,11 @@ variable "storage_account_connection_string" {
 variable "cosmosdb_name" {
   type = string
 }
+
+variable "cosmosdb_endpoint" {
+  type = string
+}
+
+variable "cosmosdb_primary_key" {
+  type = string
+}
