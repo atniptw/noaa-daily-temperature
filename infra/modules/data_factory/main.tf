@@ -14,10 +14,26 @@ resource "azurerm_data_factory_linked_service_azure_blob_storage" "ghcn" {
   connection_string = var.storage_account_connection_string
 }
 
-resource "azurerm_data_factory_linked_service_cosmosdb" "grcn" {
+resource "azurerm_data_factory_linked_service_cosmosdb" "ghcn" {
   name             = "ghcn_cosmosdb"
   data_factory_id  = azurerm_data_factory.factory.id
   account_endpoint = var.cosmosdb_endpoint
   account_key      = var.cosmosdb_primary_key
   database         = "ghcn"
+}
+
+resource "azurerm_data_factory_linked_service_web" "ghcn" {
+  name                = "ghcn_web"
+  data_factory_id     = azurerm_data_factory.factory.id
+  authentication_type = "Anonymous"
+  url                 = "https://www.ncei.noaa.gov/"
+}
+
+resource "azurerm_data_factory_dataset_http" "ghcn" {
+  name                = "ghcn_by_year"
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_web.ghcn.name
+
+  relative_url   = "/pub/data/ghcn/daily/by_year/"
+  request_method = "GET"
 }
