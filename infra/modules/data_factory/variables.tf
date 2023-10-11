@@ -10,3 +10,7 @@ variable "storage_account_connection_string" {
   type      = string
   sensitive = true
 }
+
+variable "cosmosdb_name" {
+  type = string
+}

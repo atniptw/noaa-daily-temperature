@@ -60,7 +60,7 @@ resource "azurerm_key_vault" "kv" {
   depends_on = [module.data_factory]
 }
 
-resource "azurerm_cosmosdb_account" "db" {
+resource "azurerm_cosmosdb_account" "cosmos" {
   name                = "devcosmosnoaa01"
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = data.azurerm_resource_group.rg.name
@@ -75,6 +75,42 @@ resource "azurerm_cosmosdb_account" "db" {
   geo_location {
     location          = data.azurerm_resource_group.rg.location
     failover_priority = 0
+  }
+}
+
+resource "azurerm_cosmosdb_sql_database" "db" {
+  name                = "ghcn"
+  resource_group_name = azurerm_cosmosdb_account.cosmos.resource_group_name
+  account_name        = azurerm_cosmosdb_account.cosmos.name
+}
+
+resource "azurerm_cosmosdb_sql_container" "ghcn" {
+  name                  = "ghcn-raw"
+  resource_group_name   = azurerm_cosmosdb_account.cosmos.resource_group_name
+  account_name          = azurerm_cosmosdb_account.cosmos.name
+  database_name         = azurerm_cosmosdb_sql_database.db.name
+  partition_key_path    = "/definition/id"
+  partition_key_version = 1
+  throughput            = 400
+
+  indexing_policy {
+    indexing_mode = "consistent"
+
+    included_path {
+      path = "/*"
+    }
+
+    included_path {
+      path = "/included/?"
+    }
+
+    excluded_path {
+      path = "/excluded/?"
+    }
+  }
+
+  unique_key {
+    paths = ["/definition/idlong", "/definition/idshort"]
   }
 }
 
@@ -108,4 +144,10 @@ module "data_factory" {
   location                          = data.azurerm_resource_group.rg.location
   resource_group_name               = data.azurerm_resource_group.rg.name
   storage_account_connection_string = azurerm_storage_account.st.primary_connection_string
+  cosmosdb_name                     = azurerm_cosmosdb_account.cosmos.name
+}
+
+resource "azurerm_data_factory_pipeline" "ghcn" {
+  name            = "ghcn"
+  data_factory_id = module.data_factory.id
 }
