@@ -144,6 +144,7 @@ module "data_factory" {
   location                          = data.azurerm_resource_group.rg.location
   resource_group_name               = data.azurerm_resource_group.rg.name
   storage_account_connection_string = azurerm_storage_account.st.primary_connection_string
+  storage_account_container         = azurerm_storage_container.ghcn.name
   cosmosdb_name                     = azurerm_cosmosdb_account.cosmos.name
   cosmosdb_endpoint                 = azurerm_cosmosdb_account.cosmos.endpoint
   cosmosdb_primary_key              = azurerm_cosmosdb_account.cosmos.primary_key
