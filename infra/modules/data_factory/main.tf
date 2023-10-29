@@ -47,6 +47,8 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcn" {
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_web.ghcn.name
 
+  compression_codec = "ZipDeflate"
+
   # column_delimiter    = ","
   # row_delimiter       = "NEW"
   # encoding            = "UTF-8"
