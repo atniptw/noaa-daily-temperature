@@ -41,3 +41,17 @@ resource "azurerm_data_factory_dataset_http" "ghcn" {
     "year" = "2023"
   }
 }
+
+resource "azurerm_data_factory_dataset_delimited_text" "ghcn" {
+  name                = "ghcn_raw"
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_web.ghcn.name
+
+  # column_delimiter    = ","
+  # row_delimiter       = "NEW"
+  # encoding            = "UTF-8"
+  # quote_character     = "x"
+  # escape_character    = "f"
+  # first_row_as_header = true
+  # null_value          = "NULL"
+}
