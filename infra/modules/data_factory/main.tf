@@ -22,34 +22,34 @@ resource "azurerm_data_factory_linked_service_cosmosdb" "ghcn" {
   database         = "ghcn"
 }
 
-# resource "azurerm_data_factory_linked_service_web" "ghcn" {
-#   name                = "ghcn_web"
-#   data_factory_id     = azurerm_data_factory.factory.id
-#   authentication_type = "Anonymous"
-#   url                 = "https://www.ncei.noaa.gov/"
-# }
+resource "azurerm_data_factory_linked_service_web" "ghcn" {
+  name                = "ghcn_web"
+  data_factory_id     = azurerm_data_factory.factory.id
+  authentication_type = "Anonymous"
+  url                 = "https://www.ncei.noaa.gov/"
+}
 
-# resource "azurerm_data_factory_dataset_http" "ghcn" {
-#   name                = "ghcn_by_year"
-#   data_factory_id     = azurerm_data_factory.factory.id
-#   linked_service_name = azurerm_data_factory_linked_service_web.ghcn.name
+resource "azurerm_data_factory_dataset_http" "ghcn" {
+  name                = "ghcn_by_year"
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_web.ghcn.name
 
-#   relative_url   = "@concat('/pub/data/ghcn/daily/by_year/', dataset().year)"
-#   request_method = "GET"
+  relative_url   = "@concat('/pub/data/ghcn/daily/by_year/', dataset().year)"
+  request_method = "GET"
 
-#   parameters = {
-#     "year" = "2023"
-#   }
-# }
+  parameters = {
+    "year" = "2023"
+  }
+}
 
-# resource "azurerm_data_factory_dataset_delimited_text" "ghcn" {
-#   name                = "ghcn_raw"
-#   data_factory_id     = azurerm_data_factory.factory.id
-#   linked_service_name = azurerm_data_factory_linked_service_web.ghcn.name
-#   compression_codec   = "ZipDeflate"
-#   column_delimiter    = ","
+resource "azurerm_data_factory_dataset_delimited_text" "ghcn" {
+  name                = "ghcn_raw"
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
+  compression_codec   = "ZipDeflate"
+  column_delimiter    = ","
 
-#   azure_blob_storage_location {
-#     container = var.storage_account_container
-#   }
-# }
+  azure_blob_storage_location {
+    container = var.storage_account_container
+  }
+}
