@@ -153,4 +153,64 @@ module "data_factory" {
 resource "azurerm_data_factory_pipeline" "ghcn" {
   name            = "ghcn"
   data_factory_id = module.data_factory.id
+
+  activities_json = <<JSON
+{
+    "name": "ghcn",
+    "properties": {
+        "activities": [
+            {
+                "name": "Download",
+                "type": "Copy",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "HttpSource",
+                        "httpRequestTimeout": "00:01:40"
+                    },
+                    "sink": {
+                        "type": "DelimitedTextSink",
+                        "storeSettings": {
+                            "type": "AzureBlobStorageWriteSettings",
+                            "copyBehavior": "FlattenHierarchy"
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextWriteSettings",
+                            "quoteAllText": true,
+                            "fileExtension": ".txt"
+                        }
+                    },
+                    "enableStaging": false
+                },
+                "inputs": [
+                    {
+                        "referenceName": "ghcn_by_year",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "year": "2023"
+                        }
+                    }
+                ],
+                "outputs": [
+                    {
+                        "referenceName": "ghcn_raw",
+                        "type": "DatasetReference"
+                    }
+                ]
+            }
+        ],
+        "annotations": [],
+        "lastPublishTime": "2023-10-29T21:57:10Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}
+  JSON
 }
