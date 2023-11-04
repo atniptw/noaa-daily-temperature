@@ -133,7 +133,7 @@
         "userProperties": [],
         "typeProperties": {
             "dataflow": {
-                "referenceName": "CosmosDB",
+                "referenceName": "cosmos",
                 "type": "DataFlowReference"
             },
             "compute": {

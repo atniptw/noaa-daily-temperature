@@ -122,7 +122,7 @@ resource "azurerm_data_factory_dataset_cosmosdb_sqlapi" "ghcn" {
 ##################################################################
 
 resource "azurerm_data_factory_data_flow" "example" {
-  name            = "CosmosDB"
+  name            = "cosmos"
   data_factory_id = azurerm_data_factory.factory.id
 
   source {
