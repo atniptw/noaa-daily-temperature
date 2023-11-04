@@ -43,6 +43,13 @@ JSON
   annotations = []
 }
 
+resource "azurerm_data_factory_linked_service_data_lake_storage_gen2" "ghcn" {
+  name                = "ghcn_data_lake"
+  data_factory_id     = azurerm_data_factory.factory.id
+  storage_account_key = var.storage_account_key
+  url                 = var.storage_account_url
+}
+
 ##################################################################
 #                         Datasets                               #
 ##################################################################
@@ -83,7 +90,7 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcn_compressed" {
 resource "azurerm_data_factory_dataset_delimited_text" "ghcn_extract" {
   name                = "ghcn_extract"
   data_factory_id     = azurerm_data_factory.factory.id
-  linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
+  linked_service_name = azurerm_data_factory_linked_service_data_lake_storage_gen2.ghcn.name
   column_delimiter    = ","
   row_delimiter       = "\n"
 

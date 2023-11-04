@@ -147,6 +147,8 @@ module "data_factory" {
   storage_account_container         = azurerm_storage_container.ghcn.name
   cosmosdb_name                     = azurerm_cosmosdb_account.cosmos.name
   cosmos_connection_string          = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
+  storage_account_key               = azurerm_storage_account.st.primary_access_key
+  storage_account_url               = azurerm_storage_account.st.primary_web_endpoint
 }
 
 resource "azurerm_data_factory_pipeline" "ghcn" {

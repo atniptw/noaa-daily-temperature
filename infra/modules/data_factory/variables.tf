@@ -15,6 +15,14 @@ variable "storage_account_container" {
   type = string
 }
 
+variable "storage_account_url" {
+  type = string
+}
+
+variable "storage_account_key" {
+  type = string
+}
+
 variable "cosmosdb_name" {
   type = string
 }
