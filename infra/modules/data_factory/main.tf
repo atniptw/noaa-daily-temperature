@@ -24,7 +24,7 @@ resource "azurerm_data_factory_linked_service_cosmosdb" "ghcn" {
 
 resource "azurerm_data_factory_linked_custom_service" "ghcn_http" {
   name                 = "ghcn_http"
-  data_factory_id      = azurerm_data_factory.example.id
+  data_factory_id      = azurerm_data_factory.factory.id
   type                 = "HttpServer"
   type_properties_json = <<JSON
 {
