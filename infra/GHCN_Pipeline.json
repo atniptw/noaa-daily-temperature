@@ -17,15 +17,10 @@
                 "httpRequestTimeout": "00:01:40"
             },
             "sink": {
-                "type": "DelimitedTextSink",
+                "type": "BinarySink",
                 "storeSettings": {
                     "type": "AzureBlobStorageWriteSettings",
                     "copyBehavior": "FlattenHierarchy"
-                },
-                "formatSettings": {
-                    "type": "DelimitedTextWriteSettings",
-                    "quoteAllText": true,
-                    "fileExtension": ".txt"
                 }
             },
             "enableStaging": false
@@ -41,8 +36,82 @@
         ],
         "outputs": [
             {
+                "referenceName": "ghcn_raw",
+                "type": "DatasetReference",
+                "parameters": {
+                    "year": "2023"
+                }
+            }
+        ]
+    },
+    {
+        "name": "Extract",
+        "type": "Copy",
+        "dependsOn": [
+            {
+                "activity": "Download",
+                "dependencyConditions": [
+                    "Succeeded"
+                ]
+            }
+        ],
+        "policy": {
+            "timeout": "0.12:00:00",
+            "retry": 0,
+            "retryIntervalInSeconds": 30,
+            "secureOutput": false,
+            "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+            "source": {
+                "type": "DelimitedTextSource",
+                "storeSettings": {
+                    "type": "AzureBlobStorageReadSettings",
+                    "recursive": true,
+                    "enablePartitionDiscovery": false
+                },
+                "formatSettings": {
+                    "type": "DelimitedTextReadSettings"
+                }
+            },
+            "sink": {
+                "type": "DelimitedTextSink",
+                "storeSettings": {
+                    "type": "AzureBlobStorageWriteSettings"
+                },
+                "formatSettings": {
+                    "type": "DelimitedTextWriteSettings",
+                    "quoteAllText": true,
+                    "fileExtension": ""
+                }
+            },
+            "enableStaging": false,
+            "translator": {
+                "type": "TabularTranslator",
+                "typeConversion": true,
+                "typeConversionSettings": {
+                    "allowDataTruncation": true,
+                    "treatBooleanAsNumber": false
+                }
+            }
+        },
+        "inputs": [
+            {
                 "referenceName": "ghcn_compressed",
-                "type": "DatasetReference"
+                "type": "DatasetReference",
+                "parameters": {
+                    "year": "2023"
+                }
+            }
+        ],
+        "outputs": [
+            {
+                "referenceName": "ghcn_extract",
+                "type": "DatasetReference",
+                "parameters": {
+                    "year": "2023"
+                }
             }
         ]
     }
