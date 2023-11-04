@@ -135,7 +135,7 @@ resource "azurerm_role_assignment" "example" {
 resource "azurerm_storage_container" "ghcn" {
   name                  = "ghcn"
   storage_account_name  = azurerm_storage_account.st.name
-  container_access_type = "private"
+  container_access_type = "container"
 }
 
 module "data_factory" {
