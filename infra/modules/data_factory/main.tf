@@ -20,11 +20,10 @@ resource "azurerm_data_factory_linked_service_azure_blob_storage" "ghcn" {
 }
 
 resource "azurerm_data_factory_linked_service_cosmosdb" "ghcn" {
-  name             = "ghcn_cosmosdb"
-  data_factory_id  = azurerm_data_factory.factory.id
-  account_endpoint = var.cosmosdb_endpoint
-  account_key      = var.cosmosdb_primary_key
-  database         = "ghcn"
+  name              = "ghcn_cosmosdb"
+  data_factory_id   = azurerm_data_factory.factory.id
+  connection_string = var.cosmos_connection_string
+  database          = "ghcn"
 }
 
 resource "azurerm_data_factory_linked_custom_service" "ghcn_http" {
@@ -126,7 +125,7 @@ resource "azurerm_data_factory_data_flow" "example" {
   data_factory_id = azurerm_data_factory.factory.id
 
   source {
-    name = "ghcn_storage"
+    name = "storage"
 
     dataset {
       name = azurerm_data_factory_dataset_delimited_text.ghcn_extract.name
@@ -134,18 +133,22 @@ resource "azurerm_data_factory_data_flow" "example" {
   }
 
   sink {
-    name = "ghcn_cosmos"
+    name = "cosmos"
 
     dataset {
       name = azurerm_data_factory_dataset_cosmosdb_sqlapi.ghcn.name
     }
   }
 
+  transformation {
+    name = "derivedColumn1"
+  }
+
   script = <<EOT
 source(allowSchemaDrift: true,
 	validateSchema: false,
-	ignoreNoFilesFound: false) ~> ghcn_storage
-ghcn_storage derive(stationId = toString(byPosition(1)),
+	ignoreNoFilesFound: false) ~> storage
+storage derive(stationId = toString(byPosition(1)),
 		date = toString(byPosition(2)),
 		recordType = toString(byPosition(3)),
 		recordValue = toString(byPosition(4)),
@@ -161,6 +164,6 @@ derivedColumn1 sink(allowSchemaDrift: true,
 	upsertable:false,
 	format: 'document',
 	skipDuplicateMapInputs: true,
-	skipDuplicateMapOutputs: true) ~> ghcn_cosmos
+	skipDuplicateMapOutputs: true) ~> cosmos
 EOT
 }

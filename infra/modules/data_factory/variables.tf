@@ -19,10 +19,7 @@ variable "cosmosdb_name" {
   type = string
 }
 
-variable "cosmosdb_endpoint" {
-  type = string
-}
-
-variable "cosmosdb_primary_key" {
-  type = string
+variable "cosmos_connection_string" {
+  type      = string
+  sensitive = true
 }
