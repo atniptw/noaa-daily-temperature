@@ -58,10 +58,10 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcn_compressed" {
   linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
   compression_codec   = "gzip"
   column_delimiter    = ","
-  folder              = "compressed"
 
   azure_blob_storage_location {
     container = var.storage_account_container
+    path      = "compressed"
   }
 }
 
@@ -70,9 +70,9 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcn_extract" {
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
   column_delimiter    = ","
-  folder              = "extract"
 
   azure_blob_storage_location {
     container = var.storage_account_container
+    path      = "extracted"
   }
 }
