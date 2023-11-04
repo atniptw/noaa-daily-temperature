@@ -108,11 +108,39 @@
         "outputs": [
             {
                 "referenceName": "ghcn_extract",
-                "type": "DatasetReference",
-                "parameters": {
-                    "year": "2023"
-                }
+                "type": "DatasetReference"
             }
         ]
+    },
+    {
+        "name": "Parse",
+        "type": "ExecuteDataFlow",
+        "dependsOn": [
+            {
+                "activity": "Extract",
+                "dependencyConditions": [
+                    "Succeeded"
+                ]
+            }
+        ],
+        "policy": {
+            "timeout": "0.12:00:00",
+            "retry": 0,
+            "retryIntervalInSeconds": 30,
+            "secureOutput": false,
+            "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+            "dataflow": {
+                "referenceName": "CosmosDB",
+                "type": "DataFlowReference"
+            },
+            "compute": {
+                "coreCount": 8,
+                "computeType": "General"
+            },
+            "traceLevel": "Fine"
+        }
     }
 ]

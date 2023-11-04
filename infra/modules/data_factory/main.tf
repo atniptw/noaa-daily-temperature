@@ -8,6 +8,11 @@ resource "azurerm_data_factory" "factory" {
   }
 }
 
+
+##################################################################
+#                        Linked Services                         #
+##################################################################
+
 resource "azurerm_data_factory_linked_service_azure_blob_storage" "ghcn" {
   name              = "ghcn_blob_storage"
   data_factory_id   = azurerm_data_factory.factory.id
@@ -38,6 +43,10 @@ JSON
 
   annotations = []
 }
+
+##################################################################
+#                         Datasets                               #
+##################################################################
 
 resource "azurerm_data_factory_dataset_http" "ghcn" {
   name                = "ghcn_by_year"
@@ -98,4 +107,60 @@ resource "azurerm_data_factory_dataset_binary" "ghcn" {
   parameters = {
     year = ""
   }
+}
+
+resource "azurerm_data_factory_dataset_cosmosdb_sqlapi" "ghcn" {
+  name                = "ghcn_cosmos"
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_cosmosdb.ghcn.name
+
+  collection_name = "ghcd-raw"
+}
+
+##################################################################
+#                         Data Flow                              #
+##################################################################
+
+resource "azurerm_data_factory_data_flow" "example" {
+  name            = "CosmosDB"
+  data_factory_id = azurerm_data_factory.factory.id
+
+  source {
+    name = "ghcn_storage"
+
+    dataset {
+      name = azurerm_data_factory_dataset_delimited_text.ghcn_extract.name
+    }
+  }
+
+  sink {
+    name = "ghcn_cosmos"
+
+    dataset {
+      name = azurerm_data_factory_dataset_cosmosdb_sqlapi.ghcn.name
+    }
+  }
+
+  script = <<EOT
+source(allowSchemaDrift: true,
+	validateSchema: false,
+	ignoreNoFilesFound: false) ~> ghcn_storage
+ghcn_storage derive(stationId = toString(byPosition(1)),
+		date = toString(byPosition(2)),
+		recordType = toString(byPosition(3)),
+		recordValue = toString(byPosition(4)),
+		measurementFlag = toString(byPosition(5)),
+		qualityFlag = toString(byPosition(6)),
+		sourceFlag = toString(byPosition(7)),
+		observationTime = toString(byPosition(8))) ~> derivedColumn1
+derivedColumn1 sink(allowSchemaDrift: true,
+	validateSchema: false,
+	deletable:false,
+	insertable:true,
+	updateable:false,
+	upsertable:false,
+	format: 'document',
+	skipDuplicateMapInputs: true,
+	skipDuplicateMapOutputs: true) ~> ghcn_cosmos
+EOT
 }
