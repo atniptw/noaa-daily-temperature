@@ -28,17 +28,9 @@ resource "azurerm_data_factory_linked_custom_service" "ghcn_http" {
   type                 = "HttpServer"
   type_properties_json = <<JSON
 {
-    "name": "ghcn_http",
-    "type": "Microsoft.DataFactory/factories/linkedservices",
-    "properties": {
-        "annotations": [],
-        "type": "HttpServer",
-        "typeProperties": {
-            "url": "https://www.ncei.noaa.gov/",
-            "enableServerCertificateValidation": true,
-            "authenticationType": "Anonymous"
-        }
-    }
+    "url": "https://www.ncei.noaa.gov/",
+    "enableServerCertificateValidation": true,
+    "authenticationType": "Anonymous"
 }
 JSON
 
