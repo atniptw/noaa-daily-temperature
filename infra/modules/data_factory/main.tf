@@ -61,13 +61,13 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcn_compressed" {
   row_delimiter       = "\n"
 
   azure_blob_storage_location {
-    container = var.storage_account_container
-    path      = "compressed"
-    dynamic_filename_enabled  = true
-    filename                  = "@concat(dataset().year, '.csv.gz')"
+    container                = var.storage_account_container
+    path                     = "compressed"
+    dynamic_filename_enabled = true
+    filename                 = "@concat(dataset().year, '.csv.gz')"
   }
 
-    parameters = {
+  parameters = {
     year = ""
   }
 }
@@ -93,5 +93,9 @@ resource "azurerm_data_factory_dataset_binary" "ghcn" {
   azure_blob_storage_location {
     container = var.storage_account_container
     path      = "compressed"
+  }
+
+  parameters = {
+    year = ""
   }
 }
