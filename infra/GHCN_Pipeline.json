@@ -41,7 +41,7 @@
         ],
         "outputs": [
             {
-                "referenceName": "ghcn_raw",
+                "referenceName": "ghcn_compressed",
                 "type": "DatasetReference"
             }
         ]

@@ -39,13 +39,6 @@ JSON
   annotations = []
 }
 
-# resource "azurerm_data_factory_linked_service_web" "ghcn" {
-#   name                = "ghcn_web"
-#   data_factory_id     = azurerm_data_factory.factory.id
-#   authentication_type = "Anonymous"
-#   url                 = "https://www.ncei.noaa.gov/"
-# }
-
 resource "azurerm_data_factory_dataset_http" "ghcn" {
   name                = "ghcn_by_year"
   data_factory_id     = azurerm_data_factory.factory.id
@@ -59,12 +52,25 @@ resource "azurerm_data_factory_dataset_http" "ghcn" {
   }
 }
 
-resource "azurerm_data_factory_dataset_delimited_text" "ghcn" {
-  name                = "ghcn_raw"
+resource "azurerm_data_factory_dataset_delimited_text" "ghcn_compressed" {
+  name                = "ghcn_compressed"
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
-  compression_codec   = "TarGzip"
+  compression_codec   = "gzip"
   column_delimiter    = ","
+  folder              = "compressed"
+
+  azure_blob_storage_location {
+    container = var.storage_account_container
+  }
+}
+
+resource "azurerm_data_factory_dataset_delimited_text" "ghcn_extract" {
+  name                = "ghcn_extract"
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
+  column_delimiter    = ","
+  folder              = "extract"
 
   azure_blob_storage_location {
     container = var.storage_account_container
