@@ -149,9 +149,9 @@ module "data_factory" {
   cosmos_connection_string          = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
 }
 
-resource "azurerm_data_factory_pipeline" "ghcn" {
-  name            = "ghcn"
-  data_factory_id = module.data_factory.id
+# resource "azurerm_data_factory_pipeline" "ghcn" {
+#   name            = "ghcn"
+#   data_factory_id = module.data_factory.id
 
-  activities_json = templatefile("${path.module}/GHCN_Pipeline.json", {})
-}
+#   activities_json = templatefile("${path.module}/GHCN_Pipeline.json", {})
+# }
