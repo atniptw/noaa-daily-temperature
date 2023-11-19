@@ -150,7 +150,7 @@ resource "azurerm_data_factory_data_flow" "example" {
   script = <<EOT
 source(allowSchemaDrift: true,
     validateSchema: false,
-    ignoreNoFilesFound: false) ~> row
+    ignoreNoFilesFound: false) ~> row,
 row sink(allowSchemaDrift: true,
     validateSchema: false,
     deletable:false,
