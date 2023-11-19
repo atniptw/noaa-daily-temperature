@@ -147,11 +147,17 @@ resource "azurerm_data_factory_data_flow" "example" {
     }
   }
 
+  transformation {
+    name = "parse"
+  }
+
   script = <<EOT
 source(allowSchemaDrift: true,
 	validateSchema: false,
 	ignoreNoFilesFound: false) ~> row
-row sink(allowSchemaDrift: true,
+row parse(format: 'json',
+	documentForm: 'documentPerLine') ~> parse
+parse sink(allowSchemaDrift: true,
 	validateSchema: false,
 	deletable:false,
 	insertable:true,
