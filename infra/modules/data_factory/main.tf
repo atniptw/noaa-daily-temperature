@@ -147,10 +147,6 @@ resource "azurerm_data_factory_data_flow" "example" {
     }
   }
 
-  transformation {
-    name = "derivedColumn1"
-  }
-
   script = <<EOT
 source(allowSchemaDrift: true,
     validateSchema: false,
