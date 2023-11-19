@@ -132,7 +132,7 @@ resource "azurerm_data_factory_data_flow" "example" {
   data_factory_id = azurerm_data_factory.factory.id
 
   source {
-    name = "storage"
+    name = "source"
 
     dataset {
       name = azurerm_data_factory_dataset_delimited_text.ghcn_extract.name
@@ -140,7 +140,7 @@ resource "azurerm_data_factory_data_flow" "example" {
   }
 
   sink {
-    name = "cosmos"
+    name = "sink"
 
     dataset {
       name = azurerm_data_factory_dataset_cosmosdb_sqlapi.ghcn.name
