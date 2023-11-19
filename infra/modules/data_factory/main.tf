@@ -63,7 +63,7 @@ resource "azurerm_data_factory_dataset_http" "ghcn" {
   request_method = "GET"
 
   parameters = {
-    "year" = "2023"
+    "year" = ""
   }
 }
 

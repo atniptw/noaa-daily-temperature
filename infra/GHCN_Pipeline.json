@@ -30,7 +30,10 @@
                 "referenceName": "ghcn_by_year",
                 "type": "DatasetReference",
                 "parameters": {
-                    "year": "2023"
+                    "year": {
+                        "value": "@pipeline().parameters.year",
+                        "type": "Expression"
+                    }
                 }
             }
         ],
@@ -39,7 +42,10 @@
                 "referenceName": "ghcn_raw",
                 "type": "DatasetReference",
                 "parameters": {
-                    "year": "2023"
+                    "year": {
+                        "value": "@pipeline().parameters.year",
+                        "type": "Expression"
+                    }
                 }
             }
         ]
@@ -101,7 +107,10 @@
                 "referenceName": "ghcn_compressed",
                 "type": "DatasetReference",
                 "parameters": {
-                    "year": "2023"
+                    "year": {
+                        "value": "@pipeline().parameters.year",
+                        "type": "Expression"
+                    }
                 }
             }
         ],
