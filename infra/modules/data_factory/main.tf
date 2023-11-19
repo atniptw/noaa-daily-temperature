@@ -152,22 +152,20 @@ resource "azurerm_data_factory_data_flow" "example" {
   }
 
   script = <<EOT
-source(allowSchemaDrift: true,
-	validateSchema: false,
-	ignoreNoFilesFound: false) ~> row
-row parse(format: 'json',
-	documentForm: 'documentPerLine') ~> parse
-parse sink(allowSchemaDrift: true,
-	validateSchema: false,
-	deletable:false,
-	insertable:true,
-	updateable:false,
-	upsertable:false,
-	recreate:true,
-	format: 'document',
-	partitionKey: ['/stationId'],
-	throughput: 400,
-	skipDuplicateMapInputs: true,
-	skipDuplicateMapOutputs: true) ~> cosmos
+"source(allowSchemaDrift: true,",
+"     validateSchema: false,",
+"     ignoreNoFilesFound: false) ~> source",
+"source sink(allowSchemaDrift: true,",
+"     validateSchema: false,",
+"     deletable:false,",
+"     insertable:true,",
+"     updateable:false,",
+"     upsertable:false,",
+"     recreate:true,",
+"     format: 'document',",
+"     partitionKey: ['/stationId'],",
+"     throughput: 400,",
+"     skipDuplicateMapInputs: true,",
+"     skipDuplicateMapOutputs: true) ~> sink"
 EOT
 }
