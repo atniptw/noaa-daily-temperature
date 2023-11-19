@@ -20,10 +20,10 @@ resource "azurerm_data_factory" "factory" {
 # }
 
 resource "azurerm_data_factory_linked_service_azure_blob_storage" "ghcn" {
-  name                 = "ghcn_blob_storage"
-  data_factory_id      = azurerm_data_factory.factory.id
-  connection_string    = var.storage_account_connection_string
-  use_managed_identity = false
+  name                       = "ghcn_blob_storage"
+  data_factory_id            = azurerm_data_factory.factory.id
+  connection_string_insecure = var.storage_account_connection_string
+  use_managed_identity       = false
 }
 
 resource "azurerm_data_factory_linked_service_cosmosdb" "ghcn" {
@@ -120,7 +120,7 @@ resource "azurerm_data_factory_dataset_cosmosdb_sqlapi" "ghcn" {
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_cosmosdb.ghcn.name
 
-  collection_name = "ghcd-raw"
+  collection_name = "ghcn-raw"
 }
 
 ##################################################################
@@ -153,24 +153,19 @@ resource "azurerm_data_factory_data_flow" "example" {
 
   script = <<EOT
 source(allowSchemaDrift: true,
-	validateSchema: false,
-	ignoreNoFilesFound: false) ~> storage
-storage derive(stationId = toString(byPosition(1)),
-		date = toString(byPosition(2)),
-		recordType = toString(byPosition(3)),
-		recordValue = toString(byPosition(4)),
-		measurementFlag = toString(byPosition(5)),
-		qualityFlag = toString(byPosition(6)),
-		sourceFlag = toString(byPosition(7)),
-		observationTime = toString(byPosition(8))) ~> derivedColumn1
-derivedColumn1 sink(allowSchemaDrift: true,
-	validateSchema: false,
-	deletable:false,
-	insertable:true,
-	updateable:false,
-	upsertable:false,
-	format: 'document',
-	skipDuplicateMapInputs: true,
-	skipDuplicateMapOutputs: true) ~> cosmos
+    validateSchema: false,
+    ignoreNoFilesFound: false) ~> row
+row sink(allowSchemaDrift: true,
+    validateSchema: false,
+    deletable:false,
+    insertable:true,
+    updateable:false,
+    upsertable:false,
+    recreate:true,
+    format: 'document',
+    partitionKey: ['/stationId'],
+    throughput: 400,
+    skipDuplicateMapInputs: true,
+    skipDuplicateMapOutputs: true) ~> cosmos
 EOT
 }
