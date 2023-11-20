@@ -89,7 +89,7 @@ resource "azurerm_cosmosdb_sql_container" "ghcn" {
   resource_group_name   = azurerm_cosmosdb_account.cosmos.resource_group_name
   account_name          = azurerm_cosmosdb_account.cosmos.name
   database_name         = azurerm_cosmosdb_sql_database.db.name
-  partition_key_path    = "/definition/id"
+  partition_key_path    = "/_col0_"
   partition_key_version = 1
   throughput            = 400
 
@@ -99,18 +99,6 @@ resource "azurerm_cosmosdb_sql_container" "ghcn" {
     included_path {
       path = "/*"
     }
-
-    included_path {
-      path = "/included/?"
-    }
-
-    excluded_path {
-      path = "/excluded/?"
-    }
-  }
-
-  unique_key {
-    paths = ["/definition/idlong", "/definition/idshort"]
   }
 }
 
@@ -143,7 +131,7 @@ module "data_factory" {
 
   location                          = data.azurerm_resource_group.rg.location
   resource_group_name               = data.azurerm_resource_group.rg.name
-  storage_account_connection_string = azurerm_storage_account.st.primary_connection_string
+  storage_account_connection_string = azurerm_storage_account.st.primary_blob_connection_string
   storage_account_container         = azurerm_storage_container.ghcn.name
   cosmosdb_name                     = azurerm_cosmosdb_account.cosmos.name
   cosmos_connection_string          = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string

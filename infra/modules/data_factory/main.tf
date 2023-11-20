@@ -13,17 +13,12 @@ resource "azurerm_data_factory" "factory" {
 #                        Linked Services                         #
 ##################################################################
 
-# resource "azurerm_data_factory_linked_service_azure_blob_storage" "ghcn_iam" {
-#   name              = "ghcn_blob_storage"
-#   data_factory_id   = azurerm_data_factory.factory.id
-#   connection_string = var.storage_account_connection_string
-# }
-
 resource "azurerm_data_factory_linked_service_azure_blob_storage" "ghcn" {
   name                       = "ghcn_blob_storage"
   data_factory_id            = azurerm_data_factory.factory.id
   connection_string_insecure = var.storage_account_connection_string
-  use_managed_identity       = false
+  storage_kind               = "BlobStorage"
+  use_managed_identity       = true
 }
 
 resource "azurerm_data_factory_linked_service_cosmosdb" "ghcn" {
@@ -163,7 +158,7 @@ resource "azurerm_data_factory_data_flow" "example" {
     "     upsertable:false,",
     "     recreate:true,",
     "     format: 'document',",
-    "     partitionKey: ['/stationId'],",
+    "     partitionKey: ['/_col0_'],",
     "     throughput: 400,",
     "     skipDuplicateMapInputs: true,",
     "     skipDuplicateMapOutputs: true) ~> sink"
