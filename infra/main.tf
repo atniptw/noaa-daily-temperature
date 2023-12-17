@@ -41,7 +41,7 @@ resource "azurerm_key_vault" "kv" {
 
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = module.data_factory.identity
+    object_id = module.DataFactoryTest.identity
 
     key_permissions = [
       "Get",
@@ -57,7 +57,7 @@ resource "azurerm_key_vault" "kv" {
     ]
   }
 
-  depends_on = [module.data_factory]
+  depends_on = [module.DataFactoryTest]
 }
 
 resource "azurerm_cosmosdb_account" "cosmos" {
@@ -117,7 +117,7 @@ resource "azurerm_storage_account" "st" {
 resource "azurerm_role_assignment" "example" {
   scope                = azurerm_storage_account.st.id
   role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = module.data_factory.identity
+  principal_id         = module.DataFactoryTest.identity
 }
 
 resource "azurerm_storage_container" "ghcn" {
@@ -126,8 +126,8 @@ resource "azurerm_storage_container" "ghcn" {
   container_access_type = "container"
 }
 
-module "data_factory" {
-  source = "./modules/data_factory"
+module "DataFactoryTest" {
+  source = "./modules/DataFactoryTest"
 
   location                          = data.azurerm_resource_group.rg.location
   resource_group_name               = data.azurerm_resource_group.rg.name
@@ -137,9 +137,9 @@ module "data_factory" {
   cosmos_connection_string          = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
 }
 
-resource "azurerm_data_factory_pipeline" "ghcn" {
+resource "azurerm_DataFactoryTest_pipeline" "ghcn" {
   name            = "ghcn"
-  data_factory_id = module.data_factory.id
+  DataFactoryTest_id = module.DataFactoryTest.id
 
   parameters = {
     year = ""
