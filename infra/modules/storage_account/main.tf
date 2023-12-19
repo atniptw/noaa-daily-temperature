@@ -7,7 +7,7 @@ resource "random_integer" "example" {
 }
 
 resource "azurerm_storage_account" "example" {
-  name                     = "devstnoaa03"
+  name                     = format("devstnoaa%dd", random_integer.example.result)
   resource_group_name      = var.resource_group_name
   location                 = var.location
   account_tier             = "Standard"
