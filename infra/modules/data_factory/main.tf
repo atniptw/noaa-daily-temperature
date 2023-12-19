@@ -1,4 +1,4 @@
-resource "azurerm_DataFactoryTest" "factory" {
+resource "azurerm_data_factory" "factory" {
   name                = "devadfnoaa"
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -13,30 +13,30 @@ resource "azurerm_DataFactoryTest" "factory" {
 #                        Linked Services                         #
 ##################################################################
 
-# resource "azurerm_DataFactoryTest_linked_service_azure_blob_storage" "ghcn_iam" {
+# resource "azurerm_data_factory_linked_service_azure_blob_storage" "ghcn_iam" {
 #   name              = "ghcn_blob_storage"
-#   DataFactoryTest_id   = azurerm_DataFactoryTest.factory.id
+#   data_factory_id   = azurerm_data_factory.factory.id
 #   connection_string = var.storage_account_connection_string
 # }
 
-resource "azurerm_DataFactoryTest_linked_service_azure_blob_storage" "ghcn" {
+resource "azurerm_data_factory_linked_service_azure_blob_storage" "ghcn" {
   name                       = "ghcn_blob_storage"
-  DataFactoryTest_id            = azurerm_DataFactoryTest.factory.id
+  data_factory_id            = azurerm_data_factory.factory.id
   connection_string_insecure = var.storage_account_connection_string
   storage_kind               = "BlobStorage"
   use_managed_identity       = true
 }
 
-resource "azurerm_DataFactoryTest_linked_service_cosmosdb" "ghcn" {
+resource "azurerm_data_factory_linked_service_cosmosdb" "ghcn" {
   name              = "ghcn_cosmosdb"
-  DataFactoryTest_id   = azurerm_DataFactoryTest.factory.id
+  data_factory_id   = azurerm_data_factory.factory.id
   connection_string = var.cosmos_connection_string
   database          = "ghcn"
 }
 
-resource "azurerm_DataFactoryTest_linked_custom_service" "ghcn_http" {
+resource "azurerm_data_factory_linked_custom_service" "ghcn_http" {
   name                 = "ghcn_http"
-  DataFactoryTest_id      = azurerm_DataFactoryTest.factory.id
+  data_factory_id      = azurerm_data_factory.factory.id
   type                 = "HttpServer"
   type_properties_json = <<JSON
 {
@@ -51,14 +51,21 @@ JSON
   annotations = []
 }
 
+resource "azurerm_data_factory_linked_service_azure_function" "example" {
+  name            = "ghcn_function"
+  data_factory_id = azurerm_data_factory.factory.id
+  url             = "https://${var.function_app_hostname}"
+  key             = var.function_app_key
+}
+
 ##################################################################
 #                         Datasets                               #
 ##################################################################
 
-resource "azurerm_DataFactoryTest_dataset_http" "ghcn" {
+resource "azurerm_data_factory_dataset_http" "ghcn" {
   name                = "ghcn_by_year"
-  DataFactoryTest_id     = azurerm_DataFactoryTest.factory.id
-  linked_service_name = azurerm_DataFactoryTest_linked_custom_service.ghcn_http.name
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_custom_service.ghcn_http.name
 
   relative_url   = "@concat('/pub/data/ghcn/daily/by_year/', dataset().year, '.csv.gz')"
   request_method = "GET"
@@ -68,10 +75,10 @@ resource "azurerm_DataFactoryTest_dataset_http" "ghcn" {
   }
 }
 
-resource "azurerm_DataFactoryTest_dataset_delimited_text" "ghcn_compressed" {
+resource "azurerm_data_factory_dataset_delimited_text" "ghcn_compressed" {
   name                = "ghcn_compressed"
-  DataFactoryTest_id     = azurerm_DataFactoryTest.factory.id
-  linked_service_name = azurerm_DataFactoryTest_linked_service_azure_blob_storage.ghcn.name
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
   compression_codec   = "gzip"
   column_delimiter    = ","
   row_delimiter       = "\n"
@@ -88,10 +95,10 @@ resource "azurerm_DataFactoryTest_dataset_delimited_text" "ghcn_compressed" {
   }
 }
 
-resource "azurerm_DataFactoryTest_dataset_delimited_text" "ghcn_extract" {
+resource "azurerm_data_factory_dataset_delimited_text" "ghcn_extract" {
   name                = "ghcn_extract"
-  DataFactoryTest_id     = azurerm_DataFactoryTest.factory.id
-  linked_service_name = azurerm_DataFactoryTest_linked_service_azure_blob_storage.ghcn.name
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
   column_delimiter    = ","
   row_delimiter       = "\n"
 
@@ -101,10 +108,10 @@ resource "azurerm_DataFactoryTest_dataset_delimited_text" "ghcn_extract" {
   }
 }
 
-resource "azurerm_DataFactoryTest_dataset_binary" "ghcn" {
+resource "azurerm_data_factory_dataset_binary" "ghcn" {
   name                = "ghcn_raw"
-  DataFactoryTest_id     = azurerm_DataFactoryTest.factory.id
-  linked_service_name = azurerm_DataFactoryTest_linked_service_azure_blob_storage.ghcn.name
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
 
   azure_blob_storage_location {
     container = var.storage_account_container
@@ -116,10 +123,10 @@ resource "azurerm_DataFactoryTest_dataset_binary" "ghcn" {
   }
 }
 
-resource "azurerm_DataFactoryTest_dataset_cosmosdb_sqlapi" "ghcn" {
+resource "azurerm_data_factory_dataset_cosmosdb_sqlapi" "ghcn" {
   name                = "ghcn_cosmos"
-  DataFactoryTest_id     = azurerm_DataFactoryTest.factory.id
-  linked_service_name = azurerm_DataFactoryTest_linked_service_cosmosdb.ghcn.name
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_cosmosdb.ghcn.name
 
   collection_name = "ghcn-raw"
 }
@@ -128,15 +135,15 @@ resource "azurerm_DataFactoryTest_dataset_cosmosdb_sqlapi" "ghcn" {
 #                         Data Flow                              #
 ##################################################################
 
-resource "azurerm_DataFactoryTest_data_flow" "example" {
+resource "azurerm_data_factory_data_flow" "example" {
   name            = "cosmos"
-  DataFactoryTest_id = azurerm_DataFactoryTest.factory.id
+  data_factory_id = azurerm_data_factory.factory.id
 
   source {
     name = "source"
 
     dataset {
-      name = azurerm_DataFactoryTest_dataset_delimited_text.ghcn_extract.name
+      name = azurerm_data_factory_dataset_delimited_text.ghcn_extract.name
     }
   }
 
@@ -144,7 +151,7 @@ resource "azurerm_DataFactoryTest_data_flow" "example" {
     name = "sink"
 
     dataset {
-      name = azurerm_DataFactoryTest_dataset_cosmosdb_sqlapi.ghcn.name
+      name = azurerm_data_factory_dataset_cosmosdb_sqlapi.ghcn.name
     }
   }
 
