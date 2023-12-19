@@ -1,11 +1,35 @@
+locals {
+  data_factory_name = "devadfnoaa"
+}
+
 resource "azurerm_data_factory" "factory" {
-  name                = "devadfnoaa"
+  name                = local.data_factory_name
   location            = var.location
   resource_group_name = var.resource_group_name
 
   identity {
     type = "SystemAssigned"
   }
+}
+
+module "storage_account" {
+  source = "../storage_account"
+
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  used_by             = local.data_factory_name
+}
+
+resource "azurerm_role_assignment" "example" {
+  scope                = module.storage_account.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_data_factory.factory.identity[0].principal_id
+}
+
+resource "azurerm_storage_container" "ghcn" {
+  name                  = "ghcn"
+  storage_account_name  = module.storage_account.name
+  container_access_type = "container"
 }
 
 
@@ -22,7 +46,7 @@ resource "azurerm_data_factory" "factory" {
 resource "azurerm_data_factory_linked_service_azure_blob_storage" "ghcn" {
   name                       = "ghcn_blob_storage"
   data_factory_id            = azurerm_data_factory.factory.id
-  connection_string_insecure = var.storage_account_connection_string
+  connection_string_insecure = module.storage_account.primary_blob_connection_string
   storage_kind               = "BlobStorage"
   use_managed_identity       = true
 }
@@ -84,7 +108,7 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcn_compressed" {
   row_delimiter       = "\n"
 
   azure_blob_storage_location {
-    container                = var.storage_account_container
+    container                = azurerm_storage_container.ghcn.name
     path                     = "compressed"
     dynamic_filename_enabled = true
     filename                 = "@concat(dataset().year, '.csv.gz')"
@@ -103,7 +127,7 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcn_extract" {
   row_delimiter       = "\n"
 
   azure_blob_storage_location {
-    container = var.storage_account_container
+    container = azurerm_storage_container.ghcn.name
     path      = "extracted"
   }
 }
@@ -114,7 +138,7 @@ resource "azurerm_data_factory_dataset_binary" "ghcn" {
   linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
 
   azure_blob_storage_location {
-    container = var.storage_account_container
+    container = azurerm_storage_container.ghcn.name
     path      = "compressed"
   }
 

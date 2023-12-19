@@ -102,30 +102,6 @@ resource "azurerm_cosmosdb_sql_container" "ghcn" {
   }
 }
 
-resource "azurerm_storage_account" "st" {
-  name                     = "devstnoaa02"
-  location                 = data.azurerm_resource_group.rg.location
-  resource_group_name      = data.azurerm_resource_group.rg.name
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-
-  tags = {
-    environment = var.environment
-  }
-}
-
-resource "azurerm_role_assignment" "example" {
-  scope                = azurerm_storage_account.st.id
-  role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = module.data_factory.identity
-}
-
-resource "azurerm_storage_container" "ghcn" {
-  name                  = "ghcn"
-  storage_account_name  = azurerm_storage_account.st.name
-  container_access_type = "container"
-}
-
 module "function_app" {
   source = "./modules/function_app"
 
@@ -138,8 +114,6 @@ module "data_factory" {
 
   location                          = data.azurerm_resource_group.rg.location
   resource_group_name               = data.azurerm_resource_group.rg.name
-  storage_account_connection_string = azurerm_storage_account.st.primary_blob_connection_string
-  storage_account_container         = azurerm_storage_container.ghcn.name
   cosmosdb_name                     = azurerm_cosmosdb_account.cosmos.name
   cosmos_connection_string          = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
   function_app_hostname             = module.function_app.hostname

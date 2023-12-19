@@ -1,9 +1,13 @@
-resource "azurerm_storage_account" "example" {
-  name                     = "devstnoaa"
-  resource_group_name      = var.resource_group_name
-  location                 = var.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
+locals {
+  function_app_name = "devfuncnoaa01"
+}
+
+module "storage_account" {
+  source = "../storage_account"
+
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  used_by             = local.function_app_name
 }
 
 resource "azurerm_service_plan" "example" {
@@ -15,12 +19,12 @@ resource "azurerm_service_plan" "example" {
 }
 
 resource "azurerm_linux_function_app" "example" {
-  name                = "devfuncnoaa01"
+  name                = local.function_app_name
   resource_group_name = var.resource_group_name
   location            = var.location
 
-  storage_account_name       = azurerm_storage_account.example.name
-  storage_account_access_key = azurerm_storage_account.example.primary_access_key
+  storage_account_name       = module.storage_account.name
+  storage_account_access_key = module.storage_account.primary_access_key
   service_plan_id            = azurerm_service_plan.example.id
   client_certificate_mode    = "Required"
 
