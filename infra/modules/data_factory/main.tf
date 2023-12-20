@@ -37,12 +37,6 @@ resource "azurerm_storage_container" "ghcn" {
 #                        Linked Services                         #
 ##################################################################
 
-# resource "azurerm_data_factory_linked_service_azure_blob_storage" "ghcn_iam" {
-#   name              = "ghcn_blob_storage"
-#   data_factory_id   = azurerm_data_factory.factory.id
-#   connection_string = var.storage_account_connection_string
-# }
-
 resource "azurerm_data_factory_linked_service_azure_blob_storage" "ghcn" {
   name                       = "ghcn_blob_storage"
   data_factory_id            = azurerm_data_factory.factory.id
@@ -110,12 +104,8 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcn_compressed" {
   azure_blob_storage_location {
     container                = azurerm_storage_container.ghcn.name
     path                     = "compressed"
-    dynamic_filename_enabled = true
-    filename                 = "@concat(dataset().year, '.csv.gz')"
-  }
-
-  parameters = {
-    year = ""
+    dynamic_filename_enabled = false
+    filename                 = "*"
   }
 }
 
@@ -129,6 +119,7 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcn_extract" {
   azure_blob_storage_location {
     container = azurerm_storage_container.ghcn.name
     path      = "extracted"
+    filename  = "*"
   }
 }
 
@@ -140,10 +131,6 @@ resource "azurerm_data_factory_dataset_binary" "ghcn" {
   azure_blob_storage_location {
     container = azurerm_storage_container.ghcn.name
     path      = "compressed"
-  }
-
-  parameters = {
-    year = ""
   }
 }
 

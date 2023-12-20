@@ -124,9 +124,5 @@ resource "azurerm_data_factory_pipeline" "ghcn" {
   name            = "ghcn"
   data_factory_id = module.data_factory.id
 
-  parameters = {
-    year = ""
-  }
-
   activities_json = templatefile("${path.module}/GHCN_Pipeline.json", {})
 }

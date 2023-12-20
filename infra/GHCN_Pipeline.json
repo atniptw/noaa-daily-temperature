@@ -1,2 +1,276 @@
 [
+    {
+        "name": "Check For Updates",
+        "type": "AzureFunctionActivity",
+        "dependsOn": [],
+        "policy": {
+            "timeout": "0.12:00:00",
+            "retry": 0,
+            "retryIntervalInSeconds": 30,
+            "secureOutput": false,
+            "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+            "functionName": "UpdatedDatasets",
+            "method": "GET"
+        },
+        "linkedServiceName": {
+            "referenceName": "ghcn_function",
+            "type": "LinkedServiceReference"
+        }
+    },
+    {
+        "name": "ForEach1",
+        "type": "ForEach",
+        "dependsOn": [
+            {
+                "activity": "Check For Updates",
+                "dependencyConditions": [
+                    "Succeeded"
+                ]
+            }
+        ],
+        "userProperties": [],
+        "typeProperties": {
+            "items": {
+                "value": "@activity('Download').output",
+                "type": "Expression"
+            },
+            "activities": [
+                {
+                    "name": "Download",
+                    "type": "Copy",
+                    "dependsOn": [],
+                    "policy": {
+                        "timeout": "0.12:00:00",
+                        "retry": 0,
+                        "retryIntervalInSeconds": 30,
+                        "secureOutput": false,
+                        "secureInput": false
+                    },
+                    "userProperties": [],
+                    "typeProperties": {
+                        "source": {
+                            "type": "HttpSource",
+                            "httpRequestTimeout": "00:01:40"
+                        },
+                        "sink": {
+                            "type": "BinarySink",
+                            "storeSettings": {
+                                "type": "AzureBlobStorageWriteSettings",
+                                "copyBehavior": "FlattenHierarchy"
+                            }
+                        },
+                        "enableStaging": false
+                    },
+                    "inputs": [
+                        {
+                            "referenceName": "ghcn_by_year",
+                            "type": "DatasetReference",
+                            "parameters": {
+                                "year": {
+                                    "value": "@item()",
+                                    "type": "Expression"
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "referenceName": "ghcn_raw",
+                            "type": "DatasetReference"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "name": "Lookup1",
+        "type": "Lookup",
+        "dependsOn": [
+            {
+                "activity": "ForEach1",
+                "dependencyConditions": [
+                    "Succeeded"
+                ]
+            }
+        ],
+        "policy": {
+            "timeout": "0.12:00:00",
+            "retry": 0,
+            "retryIntervalInSeconds": 30,
+            "secureOutput": false,
+            "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+            "source": {
+                "type": "DelimitedTextSource",
+                "storeSettings": {
+                    "type": "AzureBlobStorageReadSettings",
+                    "recursive": true,
+                    "enablePartitionDiscovery": false
+                },
+                "formatSettings": {
+                    "type": "DelimitedTextReadSettings"
+                }
+            },
+            "dataset": {
+                "referenceName": "ghcn_compressed",
+                "type": "DatasetReference"
+            },
+            "firstRowOnly": false
+        }
+    },
+    {
+        "name": "ForEach2",
+        "type": "ForEach",
+        "dependsOn": [
+            {
+                "activity": "Lookup1",
+                "dependencyConditions": [
+                    "Succeeded"
+                ]
+            }
+        ],
+        "userProperties": [],
+        "typeProperties": {
+            "items": {
+                "value": "@activity('Lookup1').output",
+                "type": "Expression"
+            },
+            "activities": [
+                {
+                    "name": "Extract",
+                    "type": "Copy",
+                    "dependsOn": [],
+                    "policy": {
+                        "timeout": "0.12:00:00",
+                        "retry": 0,
+                        "retryIntervalInSeconds": 30,
+                        "secureOutput": false,
+                        "secureInput": false
+                    },
+                    "userProperties": [],
+                    "typeProperties": {
+                        "source": {
+                            "type": "DelimitedTextSource",
+                            "storeSettings": {
+                                "type": "AzureBlobStorageReadSettings",
+                                "recursive": true,
+                                "enablePartitionDiscovery": false
+                            },
+                            "formatSettings": {
+                                "type": "DelimitedTextReadSettings"
+                            }
+                        },
+                        "sink": {
+                            "type": "DelimitedTextSink",
+                            "storeSettings": {
+                                "type": "AzureBlobStorageWriteSettings",
+                                "copyBehavior": "FlattenHierarchy"
+                            },
+                            "formatSettings": {
+                                "type": "DelimitedTextWriteSettings",
+                                "quoteAllText": true,
+                                "fileExtension": ".txt"
+                            }
+                        },
+                        "enableStaging": false,
+                        "translator": {
+                            "type": "TabularTranslator",
+                            "typeConversion": true,
+                            "typeConversionSettings": {
+                                "allowDataTruncation": true,
+                                "treatBooleanAsNumber": false
+                            }
+                        }
+                    },
+                    "inputs": [
+                        {
+                            "referenceName": "ghcn_compressed",
+                            "type": "DatasetReference"
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "referenceName": "ghcn_extract",
+                            "type": "DatasetReference"
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "name": "Lookup2",
+        "type": "Lookup",
+        "dependsOn": [
+            {
+                "activity": "ForEach2",
+                "dependencyConditions": [
+                    "Succeeded"
+                ]
+            }
+        ],
+        "policy": {
+            "timeout": "0.12:00:00",
+            "retry": 0,
+            "retryIntervalInSeconds": 30,
+            "secureOutput": false,
+            "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+            "source": {
+                "type": "DelimitedTextSource",
+                "storeSettings": {
+                    "type": "AzureBlobStorageReadSettings",
+                    "recursive": true,
+                    "enablePartitionDiscovery": false
+                },
+                "formatSettings": {
+                    "type": "DelimitedTextReadSettings"
+                }
+            },
+            "dataset": {
+                "referenceName": "ghcn_extract",
+                "type": "DatasetReference"
+            },
+            "firstRowOnly": false
+        }
+    },
+    {
+        "name": "Data flow1",
+        "type": "ExecuteDataFlow",
+        "dependsOn": [
+            {
+                "activity": "Lookup2",
+                "dependencyConditions": [
+                    "Succeeded"
+                ]
+            }
+        ],
+        "policy": {
+            "timeout": "0.12:00:00",
+            "retry": 0,
+            "retryIntervalInSeconds": 30,
+            "secureOutput": false,
+            "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+            "dataflow": {
+                "referenceName": "cosmos",
+                "type": "DataFlowReference"
+            },
+            "compute": {
+                "coreCount": 8,
+                "computeType": "General"
+            },
+            "traceLevel": "Fine"
+        }
+    }
 ]
