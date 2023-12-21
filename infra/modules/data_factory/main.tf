@@ -76,7 +76,7 @@ resource "azurerm_data_factory_linked_service_cosmosdb" "ghcn" {
   database          = "ghcn"
 }
 
-resource "azurerm_data_factory_linked_custom_service" "ghcn_http" {
+resource "azurerm_data_factory_linked_custom_service" "ghcn" {
   name                 = "ghcn_http"
   data_factory_id      = azurerm_data_factory.factory.id
   type                 = "HttpServer"
@@ -89,7 +89,7 @@ resource "azurerm_data_factory_linked_custom_service" "ghcn_http" {
 JSON
 }
 
-resource "azurerm_data_factory_linked_service_azure_function" "example" {
+resource "azurerm_data_factory_linked_service_azure_function" "ghcn" {
   name            = "ghcn_function"
   data_factory_id = azurerm_data_factory.factory.id
   url             = "https://${var.function_app_hostname}"
@@ -100,10 +100,10 @@ resource "azurerm_data_factory_linked_service_azure_function" "example" {
 #                         Datasets                               #
 ##################################################################
 
-resource "azurerm_data_factory_dataset_http" "ghcn" {
-  name                = "ghcn_by_year"
+resource "azurerm_data_factory_dataset_http" "download_ghcn_file" {
+  name                = "download_ghcn_file"
   data_factory_id     = azurerm_data_factory.factory.id
-  linked_service_name = azurerm_data_factory_linked_custom_service.ghcn_http.name
+  linked_service_name = azurerm_data_factory_linked_custom_service.ghcn.name
 
   relative_url   = "@concat('/pub/data/ghcn/daily/by_year/', dataset().year, '.csv.gz')"
   request_method = "GET"
@@ -113,8 +113,8 @@ resource "azurerm_data_factory_dataset_http" "ghcn" {
   }
 }
 
-resource "azurerm_data_factory_dataset_delimited_text" "ghcn_compressed" {
-  name                = "ghcn_compressed"
+resource "azurerm_data_factory_dataset_delimited_text" "compressed_file_source" {
+  name                = "compressed_file_source"
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
   compression_codec   = "gzip"
@@ -134,8 +134,8 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcn_compressed" {
 
 }
 
-resource "azurerm_data_factory_dataset_delimited_text" "ghcn_extract" {
-  name                = "ghcn_extract"
+resource "azurerm_data_factory_dataset_delimited_text" "delimited_text_sink" {
+  name                = "delimited_text_sink"
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
   column_delimiter    = ","
@@ -147,8 +147,8 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcn_extract" {
   }
 }
 
-resource "azurerm_data_factory_dataset_delimited_text" "ghcn_extract2" {
-  name                = "DelimitedText2"
+resource "azurerm_data_factory_dataset_delimited_text" "delimited_text_source" {
+  name                = "delimited_text_source"
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
   column_delimiter    = ","
@@ -166,8 +166,8 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcn_extract2" {
 
 }
 
-resource "azurerm_data_factory_dataset_binary" "ghcn" {
-  name                = "ghcn_raw"
+resource "azurerm_data_factory_dataset_binary" "binary_data_sink" {
+  name                = "binary_data_sink"
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
 
@@ -177,8 +177,8 @@ resource "azurerm_data_factory_dataset_binary" "ghcn" {
   }
 }
 
-resource "azurerm_data_factory_dataset_cosmosdb_sqlapi" "ghcn" {
-  name                = "ghcn_cosmos"
+resource "azurerm_data_factory_dataset_cosmosdb_sqlapi" "staging_sink" {
+  name                = "staging_sink"
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_cosmosdb.ghcn.name
 
@@ -197,7 +197,7 @@ resource "azurerm_data_factory_data_flow" "example" {
     name = "source"
 
     dataset {
-      name = azurerm_data_factory_dataset_delimited_text.ghcn_extract2.name
+      name = azurerm_data_factory_dataset_delimited_text.delimited_text_source.name
     }
   }
 
@@ -215,7 +215,7 @@ resource "azurerm_data_factory_data_flow" "example" {
     name = "sink"
 
     dataset {
-      name = azurerm_data_factory_dataset_cosmosdb_sqlapi.ghcn.name
+      name = azurerm_data_factory_dataset_cosmosdb_sqlapi.staging_sink.name
     }
   }
 

@@ -67,7 +67,7 @@
                     },
                     "inputs": [
                         {
-                            "referenceName": "ghcn_by_year",
+                            "referenceName": "download_ghcn_file",
                             "type": "DatasetReference",
                             "parameters": {
                                 "year": {
@@ -79,7 +79,7 @@
                     ],
                     "outputs": [
                         {
-                            "referenceName": "ghcn_raw",
+                            "referenceName": "binary_data_sink",
                             "type": "DatasetReference",
                             "parameters": {}
                         }
@@ -109,7 +109,7 @@
         "userProperties": [],
         "typeProperties": {
             "dataset": {
-                "referenceName": "ghcn_raw",
+                "referenceName": "binary_data_sink",
                 "type": "DatasetReference",
                 "parameters": {}
             },
@@ -193,7 +193,7 @@
                     },
                     "inputs": [
                         {
-                            "referenceName": "ghcn_compressed",
+                            "referenceName": "compressed_file_source",
                             "type": "DatasetReference",
                             "parameters": {
                                 "filename": {
@@ -205,7 +205,7 @@
                     ],
                     "outputs": [
                         {
-                            "referenceName": "ghcn_extract",
+                            "referenceName": "delimited_text_sink",
                             "type": "DatasetReference",
                             "parameters": {}
                         }
@@ -235,7 +235,7 @@
         "userProperties": [],
         "typeProperties": {
             "dataset": {
-                "referenceName": "ghcn_extract",
+                "referenceName": "delimited_text_sink",
                 "type": "DatasetReference",
                 "parameters": {}
             },
