@@ -3,18 +3,13 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 
-namespace SEP.PD;
+namespace FunctionApp;
 
-public class HttpTrigger1
+public class ProcessStations(ILoggerFactory loggerFactory)
 {
-    private readonly ILogger _logger;
+    private readonly ILogger _logger = loggerFactory.CreateLogger<ProcessStations>();
 
-    public HttpTrigger1(ILoggerFactory loggerFactory)
-    {
-        _logger = loggerFactory.CreateLogger<HttpTrigger1>();
-    }
-
-    [Function("HttpTrigger1")]
+    [Function("ProcessStations")]
     public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
     {
         _logger.LogInformation("C# HTTP trigger function processed a request.");

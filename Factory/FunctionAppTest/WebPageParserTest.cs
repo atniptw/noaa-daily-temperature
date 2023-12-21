@@ -4,7 +4,7 @@ using HtmlAgilityPack;
 namespace FunctionAppTest;
 
 [TestClass]
-public class ParseTest
+public class WebPageParserTest
 {
     private static readonly string _html = @"<!DOCTYPE HTML PUBLIC ""-//W3C//DTD HTML 3.2 Final//EN"">
 <html>

@@ -7,15 +7,10 @@ using Microsoft.Extensions.Logging;
 
 namespace FunctionApp;
 
-public class UpdatedDatasets
+public class UpdatedDatasets(ILoggerFactory loggerFactory)
 {
     private const string URL = "https://www.ncei.noaa.gov/pub/data/ghcn/daily/by_year/";
-    private readonly ILogger _logger;
-
-    public UpdatedDatasets(ILoggerFactory loggerFactory)
-    {
-        _logger = loggerFactory.CreateLogger<UpdatedDatasets>();
-    }
+    private readonly ILogger _logger = loggerFactory.CreateLogger<UpdatedDatasets>();
 
     [Function("UpdatedDatasets")]
     public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)

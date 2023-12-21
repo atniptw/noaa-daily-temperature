@@ -68,6 +68,7 @@
       }
     },
     {
+      "label": "func: host start",
       "type": "func",
       "dependsOn": "build (functions)",
       "options": {

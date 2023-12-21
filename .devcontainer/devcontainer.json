@@ -1,26 +1,25 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/debian
 {
-	"name": "Debian",
+	"name": ".Net",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/base:bullseye",
+	"image": "mcr.microsoft.com/devcontainers/dotnet:dev-8.0",
 	"features": {
-		"ghcr.io/devcontainers/features/dotnet:2": {
-			"installUsingApt": true,
-			"version": "lts"
-		},
-		"ghcr.io/devcontainers/features/azure-cli:1": {
-			
-		},
-		"ghcr.io/devcontainers/features/terraform:1": {
-			"installTerraformDocs": true,
-			"version": "latest",
-			"tflint": "latest",
-			"terragrunt": "latest"
-		},
-		"ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools:1": {
-			"version": "latest"
-		}
+		// "ghcr.io/devcontainers/features/dotnet:2": {
+		// 	"installUsingApt": true,
+		// 	"version": "lts"
+		// },
+		// "ghcr.io/devcontainers/features/azure-cli:1": {
+		// },
+		// "ghcr.io/devcontainers/features/terraform:1": {
+		// 	"installTerraformDocs": true,
+		// 	"version": "latest",
+		// 	"tflint": "latest",
+		// 	"terragrunt": "latest"
+		// },
+		// "ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools:1": {
+		// 	"version": "latest"
+		// }
 	},
 	// "postCreateCommand": "bash -c 'sudo apt-get update && sudo apt-get install -y libsqlite3-mod-spatialite libsqlite3-dev sqlite3'",
 
@@ -28,7 +27,18 @@
 	// "features": {},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [5252]
+	"forwardPorts": [
+		5252
+	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-azuretools.vscode-azurefunctions",
+				"ms-dotnettools.csharp",
+				"ms-dotnettools.csdevkit"
+			]
+		}
+	}
 
 	// Configure tool-specific properties.
 	// "customizations": {},
