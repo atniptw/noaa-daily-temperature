@@ -85,11 +85,11 @@ resource "azurerm_cosmosdb_sql_database" "db" {
 }
 
 resource "azurerm_cosmosdb_sql_container" "ghcn" {
-  name                  = "ghcn-raw"
+  name                  = "staging"
   resource_group_name   = azurerm_cosmosdb_account.cosmos.resource_group_name
   account_name          = azurerm_cosmosdb_account.cosmos.name
   database_name         = azurerm_cosmosdb_sql_database.db.name
-  partition_key_path    = "/_col0_"
+  partition_key_path    = "/Date"
   partition_key_version = 1
   throughput            = 400
 

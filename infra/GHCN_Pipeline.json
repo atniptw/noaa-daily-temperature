@@ -12,7 +12,8 @@
         },
         "userProperties": [],
         "typeProperties": {
-            "functionName": "UpdatedDatasets",
+            "headers": {},
+            "functionName": "UpdatedDatasets?limit=1",
             "method": "GET"
         },
         "linkedServiceName": {
@@ -21,7 +22,7 @@
         }
     },
     {
-        "name": "ForEach1",
+        "name": "Download From NOAA",
         "type": "ForEach",
         "dependsOn": [
             {
@@ -34,7 +35,7 @@
         "userProperties": [],
         "typeProperties": {
             "items": {
-                "value": "@activity('Download').output",
+                "value": "@json(activity('Check For Updates').output.Response)",
                 "type": "Expression"
             },
             "activities": [
@@ -79,7 +80,8 @@
                     "outputs": [
                         {
                             "referenceName": "ghcn_raw",
-                            "type": "DatasetReference"
+                            "type": "DatasetReference",
+                            "parameters": {}
                         }
                     ]
                 }
@@ -87,11 +89,11 @@
         }
     },
     {
-        "name": "Lookup1",
-        "type": "Lookup",
+        "name": "Get Metadata1",
+        "type": "GetMetadata",
         "dependsOn": [
             {
-                "activity": "ForEach1",
+                "activity": "Download From NOAA",
                 "dependencyConditions": [
                     "Succeeded"
                 ]
@@ -106,30 +108,31 @@
         },
         "userProperties": [],
         "typeProperties": {
-            "source": {
-                "type": "DelimitedTextSource",
-                "storeSettings": {
-                    "type": "AzureBlobStorageReadSettings",
-                    "recursive": true,
-                    "enablePartitionDiscovery": false
-                },
-                "formatSettings": {
-                    "type": "DelimitedTextReadSettings"
-                }
-            },
             "dataset": {
-                "referenceName": "ghcn_compressed",
-                "type": "DatasetReference"
+                "referenceName": "ghcn_raw",
+                "type": "DatasetReference",
+                "parameters": {}
             },
-            "firstRowOnly": false
+            "fieldList": [
+                "childItems"
+            ],
+            "storeSettings": {
+                "type": "AzureBlobStorageReadSettings",
+                "recursive": true,
+                "enablePartitionDiscovery": false
+            },
+            "formatSettings": {
+                "type": "BinaryReadSettings",
+                "compressionProperties": null
+            }
         }
     },
     {
-        "name": "ForEach2",
+        "name": "Extract File",
         "type": "ForEach",
         "dependsOn": [
             {
-                "activity": "Lookup1",
+                "activity": "Get Metadata1",
                 "dependencyConditions": [
                     "Succeeded"
                 ]
@@ -138,7 +141,7 @@
         "userProperties": [],
         "typeProperties": {
             "items": {
-                "value": "@activity('Lookup1').output",
+                "value": "@activity('Get Metadata1').output.childItems",
                 "type": "Expression"
             },
             "activities": [
@@ -163,14 +166,14 @@
                                 "enablePartitionDiscovery": false
                             },
                             "formatSettings": {
-                                "type": "DelimitedTextReadSettings"
+                                "type": "DelimitedTextReadSettings",
+                                "compressionProperties": null
                             }
                         },
                         "sink": {
                             "type": "DelimitedTextSink",
                             "storeSettings": {
-                                "type": "AzureBlobStorageWriteSettings",
-                                "copyBehavior": "FlattenHierarchy"
+                                "type": "AzureBlobStorageWriteSettings"
                             },
                             "formatSettings": {
                                 "type": "DelimitedTextWriteSettings",
@@ -191,13 +194,20 @@
                     "inputs": [
                         {
                             "referenceName": "ghcn_compressed",
-                            "type": "DatasetReference"
+                            "type": "DatasetReference",
+                            "parameters": {
+                                "filename": {
+                                    "value": "@item().name",
+                                    "type": "Expression"
+                                }
+                            }
                         }
                     ],
                     "outputs": [
                         {
                             "referenceName": "ghcn_extract",
-                            "type": "DatasetReference"
+                            "type": "DatasetReference",
+                            "parameters": {}
                         }
                     ]
                 }
@@ -205,11 +215,11 @@
         }
     },
     {
-        "name": "Lookup2",
-        "type": "Lookup",
+        "name": "Get Metadata2",
+        "type": "GetMetadata",
         "dependsOn": [
             {
-                "activity": "ForEach2",
+                "activity": "Extract File",
                 "dependencyConditions": [
                     "Succeeded"
                 ]
@@ -224,53 +234,79 @@
         },
         "userProperties": [],
         "typeProperties": {
-            "source": {
-                "type": "DelimitedTextSource",
-                "storeSettings": {
-                    "type": "AzureBlobStorageReadSettings",
-                    "recursive": true,
-                    "enablePartitionDiscovery": false
-                },
-                "formatSettings": {
-                    "type": "DelimitedTextReadSettings"
-                }
-            },
             "dataset": {
                 "referenceName": "ghcn_extract",
-                "type": "DatasetReference"
+                "type": "DatasetReference",
+                "parameters": {}
             },
-            "firstRowOnly": false
+            "fieldList": [
+                "childItems"
+            ],
+            "storeSettings": {
+                "type": "AzureBlobStorageReadSettings",
+                "recursive": true,
+                "enablePartitionDiscovery": false
+            },
+            "formatSettings": {
+                "type": "DelimitedTextReadSettings",
+                "compressionProperties": null
+            }
         }
     },
     {
-        "name": "Data flow1",
-        "type": "ExecuteDataFlow",
+        "name": "Read File",
+        "type": "ForEach",
         "dependsOn": [
             {
-                "activity": "Lookup2",
+                "activity": "Get Metadata2",
                 "dependencyConditions": [
                     "Succeeded"
                 ]
             }
         ],
-        "policy": {
-            "timeout": "0.12:00:00",
-            "retry": 0,
-            "retryIntervalInSeconds": 30,
-            "secureOutput": false,
-            "secureInput": false
-        },
         "userProperties": [],
         "typeProperties": {
-            "dataflow": {
-                "referenceName": "cosmos",
-                "type": "DataFlowReference"
+            "items": {
+                "value": "@activity('Get Metadata2').output.childItems",
+                "type": "Expression"
             },
-            "compute": {
-                "coreCount": 8,
-                "computeType": "General"
-            },
-            "traceLevel": "Fine"
+            "activities": [
+                {
+                    "name": "Data flow1",
+                    "type": "ExecuteDataFlow",
+                    "dependsOn": [],
+                    "policy": {
+                        "timeout": "0.12:00:00",
+                        "retry": 0,
+                        "retryIntervalInSeconds": 30,
+                        "secureOutput": false,
+                        "secureInput": false
+                    },
+                    "userProperties": [],
+                    "typeProperties": {
+                        "dataflow": {
+                            "referenceName": "cosmos",
+                            "type": "DataFlowReference",
+                            "parameters": {},
+                            "datasetParameters": {
+                                "sink": {},
+                                "source": {
+                                    "filename": {
+                                        "value": "@item()",
+                                        "type": "Expression"
+                                    }
+                                }
+                            }
+                        },
+                        "staging": {},
+                        "compute": {
+                            "coreCount": 8,
+                            "computeType": "General"
+                        },
+                        "traceLevel": "Fine"
+                    }
+                }
+            ]
         }
     }
 ]

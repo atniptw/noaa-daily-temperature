@@ -12,6 +12,10 @@ resource "azurerm_data_factory" "factory" {
   }
 }
 
+##################################################################
+#                        Storage Account                         #
+##################################################################
+
 module "storage_account" {
   source = "../storage_account"
 
@@ -29,7 +33,27 @@ resource "azurerm_role_assignment" "example" {
 resource "azurerm_storage_container" "ghcn" {
   name                  = "ghcn"
   storage_account_name  = module.storage_account.name
-  container_access_type = "container"
+  container_access_type = "private"
+}
+
+resource "azurerm_storage_management_policy" "example" {
+  storage_account_id = module.storage_account.id
+
+  rule {
+    name    = "rule1"
+    enabled = true
+    filters {
+      blob_types = ["blockBlob"]
+    }
+    actions {
+      base_blob {
+        delete_after_days_since_modification_greater_than = 1
+      }
+      snapshot {
+        delete_after_days_since_creation_greater_than = 1
+      }
+    }
+  }
 }
 
 
@@ -63,10 +87,6 @@ resource "azurerm_data_factory_linked_custom_service" "ghcn_http" {
     "authenticationType": "Anonymous"
 }
 JSON
-
-  parameters = {}
-
-  annotations = []
 }
 
 resource "azurerm_data_factory_linked_service_azure_function" "example" {
@@ -101,12 +121,17 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcn_compressed" {
   column_delimiter    = ","
   row_delimiter       = "\n"
 
+  parameters = {
+    filename = ""
+  }
+
   azure_blob_storage_location {
     container                = azurerm_storage_container.ghcn.name
     path                     = "compressed"
-    dynamic_filename_enabled = false
-    filename                 = "*"
+    dynamic_filename_enabled = true
+    filename                 = "@dataset().filename"
   }
+
 }
 
 resource "azurerm_data_factory_dataset_delimited_text" "ghcn_extract" {
@@ -119,8 +144,26 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcn_extract" {
   azure_blob_storage_location {
     container = azurerm_storage_container.ghcn.name
     path      = "extracted"
-    filename  = "*"
   }
+}
+
+resource "azurerm_data_factory_dataset_delimited_text" "ghcn_extract2" {
+  name                = "DelimitedText2"
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
+  column_delimiter    = ","
+
+  parameters = {
+    filename = ""
+  }
+
+  azure_blob_storage_location {
+    container                = azurerm_storage_container.ghcn.name
+    dynamic_filename_enabled = true
+    path                     = "extracted"
+    filename                 = "@dataset().filename"
+  }
+
 }
 
 resource "azurerm_data_factory_dataset_binary" "ghcn" {
@@ -139,7 +182,7 @@ resource "azurerm_data_factory_dataset_cosmosdb_sqlapi" "ghcn" {
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_cosmosdb.ghcn.name
 
-  collection_name = "ghcn-raw"
+  collection_name = "staging"
 }
 
 ##################################################################
@@ -154,8 +197,18 @@ resource "azurerm_data_factory_data_flow" "example" {
     name = "source"
 
     dataset {
-      name = azurerm_data_factory_dataset_delimited_text.ghcn_extract.name
+      name = azurerm_data_factory_dataset_delimited_text.ghcn_extract2.name
     }
+  }
+
+  transformation {
+    name = "filter1"
+  }
+  transformation {
+    name = "derivedColumn1"
+  }
+  transformation {
+    name = "select1"
   }
 
   sink {
@@ -166,23 +219,41 @@ resource "azurerm_data_factory_data_flow" "example" {
     }
   }
 
-  transformation {
-    name = "parse"
-  }
-
   script_lines = [
-    "source(allowSchemaDrift: true,",
+    "source(output(",
+    "          Column_1 as string,",
+    "          Column_2 as string,",
+    "          Column_3 as string,",
+    "          Column_4 as string,",
+    "          Column_5 as string,",
+    "          Column_6 as string,",
+    "          Column_7 as string,",
+    "          Column_8 as string",
+    "     ),",
+    "     allowSchemaDrift: true,",
     "     validateSchema: false,",
     "     ignoreNoFilesFound: false) ~> source",
-    "source sink(allowSchemaDrift: true,",
+    "source filter(not(isNull(Column_1)) && not(isNull(Column_2)) && not(isNull(Column_3)) && not(isNull(Column_4))) ~> filter1",
+    "filter1 derive(RecordValue = divide(toInteger(Column_4), 10)) ~> derivedColumn1",
+    "derivedColumn1 select(mapColumn(",
+    "          StationId = Column_1,",
+    "          Date = Column_2,",
+    "          RecordType = Column_3,",
+    "          RecordValue,",
+    "          MeasurementFlag = Column_5,",
+    "          QualityFlag = Column_6,",
+    "          SourceFlag = Column_7,",
+    "          ObservationTime = Column_8",
+    "     ),",
+    "     skipDuplicateMapInputs: true,",
+    "     skipDuplicateMapOutputs: true) ~> select1",
+    "select1 sink(allowSchemaDrift: true,",
     "     validateSchema: false,",
     "     deletable:false,",
     "     insertable:true,",
     "     updateable:false,",
     "     upsertable:false,",
-    "     recreate:true,",
     "     format: 'document',",
-    "     partitionKey: ['/_col0_'],",
     "     throughput: 400,",
     "     skipDuplicateMapInputs: true,",
     "     skipDuplicateMapOutputs: true) ~> sink"
