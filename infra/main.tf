@@ -92,6 +92,7 @@ resource "azurerm_cosmosdb_sql_container" "ghcn" {
   partition_key_path    = "/Date"
   partition_key_version = 1
   throughput            = 400
+  default_ttl           = 3600
 
   indexing_policy {
     indexing_mode = "consistent"
@@ -112,12 +113,12 @@ module "function_app" {
 module "data_factory" {
   source = "./modules/data_factory"
 
-  location                          = data.azurerm_resource_group.rg.location
-  resource_group_name               = data.azurerm_resource_group.rg.name
-  cosmosdb_name                     = azurerm_cosmosdb_account.cosmos.name
-  cosmos_connection_string          = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
-  function_app_hostname             = module.function_app.hostname
-  function_app_key                  = module.function_app.function_key
+  location                 = data.azurerm_resource_group.rg.location
+  resource_group_name      = data.azurerm_resource_group.rg.name
+  cosmosdb_name            = azurerm_cosmosdb_account.cosmos.name
+  cosmos_connection_string = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
+  function_app_hostname    = module.function_app.hostname
+  function_app_key         = module.function_app.function_key
 }
 
 resource "azurerm_data_factory_pipeline" "ghcn" {
