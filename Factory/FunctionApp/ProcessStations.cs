@@ -16,35 +16,46 @@ public class ProcessStations(ILoggerFactory loggerFactory)
     [Function("ProcessStations")]
     public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
     {
-        _logger.LogInformation("Download Page");
-        var web = new HtmlWeb();
-        var doc = web.Load(URL);
-
-        var stations = new List<Station>();
-
-        using (StringReader reader = new StringReader(doc.Text))
+        try
         {
-            _logger.LogInformation("Parse Document");
-            string record;
-            while ((record = reader.ReadLine()) != null)
+            _logger.LogInformation("Download Page");
+            var web = new HtmlWeb();
+            var doc = web.Load(URL);
+
+            var stations = new List<Station>();
+
+            using (StringReader reader = new StringReader(doc.Text))
             {
-                stations.Add(StationParser.ParseRecord(record));
+                _logger.LogInformation("Parse Document");
+                string record;
+                while ((record = reader.ReadLine()) != null)
+                {
+                    stations.Add(StationParser.ParseRecord(record));
+                }
             }
+
+            // var fileLines = File.ReadAllLines(FILENAME);
+            // foreach (var record in fileLines)
+            // {
+            //     stations.Add(StationParser.ParseRecord(record));
+            // }
+
+
+            var json = JsonSerializer.Serialize(stations);
+
+            var response = req.CreateResponse(HttpStatusCode.OK);
+            response.Headers.Add("Content-Type", "application/json; charset=utf-8");
+            response.WriteString(json);
+
+            return response;
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
 
-        // var fileLines = File.ReadAllLines(FILENAME);
-        // foreach (var record in fileLines)
-        // {
-        //     stations.Add(StationParser.ParseRecord(record));
-        // }
-
-
-        var json = JsonSerializer.Serialize(stations);
-
-        var response = req.CreateResponse(HttpStatusCode.OK);
-        response.Headers.Add("Content-Type", "application/json; charset=utf-8");
-        response.WriteString(json);
-
-        return response;
+            var response = req.CreateResponse(HttpStatusCode.ServiceUnavailable);
+            response.Headers.Add("Content-Type", "application/json; charset=utf-8");
+            return response;
+        }
     }
 }
