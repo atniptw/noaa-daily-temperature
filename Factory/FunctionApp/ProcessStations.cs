@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Security;
 using System.Text.Json;
 using HtmlAgilityPack;
 using Microsoft.Azure.Functions.Worker;
@@ -19,13 +20,29 @@ public class ProcessStations(ILoggerFactory loggerFactory)
         try
         {
             _logger.LogInformation("Download Page");
-            var web = new HtmlWeb();
-            var doc = web.Load(URL);
-
             var stations = new List<Station>();
 
-            using (StringReader reader = new StringReader(doc.Text))
+            using (var httpClientHandler = new HttpClientHandler())
             {
+                // httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) =>
+                // {
+                //     if (sslPolicyErrors == SslPolicyErrors.None)
+                //     {
+                //         return true;
+                //     }
+
+                //     if (cert.GetCertHashString() == "99D5C9E3C60D2AE88006C81E58ECBB68C85A2FFE")
+                //     {
+                //         return true;
+                //     }
+                //     return false;
+                // };
+
+                using var httpClient = new HttpClient(httpClientHandler);
+                var httpResponse = httpClient.GetAsync(URL).Result;
+                var content = httpResponse.Content.ReadAsStringAsync().Result;
+
+                using StringReader reader = new StringReader(content);
                 _logger.LogInformation("Parse Document");
                 string record;
                 while ((record = reader.ReadLine()) != null)
@@ -33,13 +50,6 @@ public class ProcessStations(ILoggerFactory loggerFactory)
                     stations.Add(StationParser.ParseRecord(record));
                 }
             }
-
-            // var fileLines = File.ReadAllLines(FILENAME);
-            // foreach (var record in fileLines)
-            // {
-            //     stations.Add(StationParser.ParseRecord(record));
-            // }
-
 
             var json = JsonSerializer.Serialize(stations);
 
