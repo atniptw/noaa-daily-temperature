@@ -78,29 +78,21 @@ resource "azurerm_cosmosdb_account" "cosmos" {
   }
 }
 
-resource "azurerm_cosmosdb_sql_database" "db" {
-  name                = "ghcn"
-  resource_group_name = azurerm_cosmosdb_account.cosmos.resource_group_name
-  account_name        = azurerm_cosmosdb_account.cosmos.name
+module "staging_db" {
+  source = "./modules/cosmos_db"
+
+  resource_group_name   = data.azurerm_resource_group.rg.name
+  cosmosdb_account_name = azurerm_cosmosdb_account.cosmos.name
+  db_name               = "${var.environment}-staging"
+  ttl                   = 3600
 }
 
-resource "azurerm_cosmosdb_sql_container" "ghcn" {
-  name                  = "staging"
-  resource_group_name   = azurerm_cosmosdb_account.cosmos.resource_group_name
-  account_name          = azurerm_cosmosdb_account.cosmos.name
-  database_name         = azurerm_cosmosdb_sql_database.db.name
-  partition_key_path    = "/Date"
-  partition_key_version = 1
-  throughput            = 400
-  default_ttl           = 3600
+module "production_db" {
+  source = "./modules/cosmos_db"
 
-  indexing_policy {
-    indexing_mode = "consistent"
-
-    included_path {
-      path = "/*"
-    }
-  }
+  resource_group_name   = data.azurerm_resource_group.rg.name
+  cosmosdb_account_name = azurerm_cosmosdb_account.cosmos.name
+  db_name               = var.environment
 }
 
 module "function_app" {
@@ -125,5 +117,12 @@ resource "azurerm_data_factory_pipeline" "ghcn" {
   name            = "ghcn"
   data_factory_id = module.data_factory.id
 
-  activities_json = templatefile("${path.module}/GHCN_Pipeline.json", {})
+  activities_json = templatefile("${path.module}/pipeline_definitions/GHCN_Pipeline.json", {})
+}
+
+resource "azurerm_data_factory_pipeline" "stations" {
+  name            = "stations"
+  data_factory_id = module.data_factory.id
+
+  activities_json = templatefile("${path.module}/pipeline_definitions/Stations_Pipeline.json", {})
 }

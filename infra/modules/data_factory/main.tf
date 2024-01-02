@@ -100,8 +100,8 @@ resource "azurerm_data_factory_linked_service_azure_function" "ghcn" {
 #                         Datasets                               #
 ##################################################################
 
-resource "azurerm_data_factory_dataset_http" "download_ghcn_file" {
-  name                = "download_ghcn_file"
+resource "azurerm_data_factory_dataset_http" "ghcn_by_year_source" {
+  name                = "ghcn_by_year_source"
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_custom_service.ghcn.name
 
@@ -113,8 +113,19 @@ resource "azurerm_data_factory_dataset_http" "download_ghcn_file" {
   }
 }
 
-resource "azurerm_data_factory_dataset_delimited_text" "compressed_file_source" {
-  name                = "compressed_file_source"
+resource "azurerm_data_factory_dataset_binary" "ghcn_by_year_binary_sink" {
+  name                = "ghcn_by_year_binary_sink"
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
+
+  azure_blob_storage_location {
+    container = azurerm_storage_container.ghcn.name
+    path      = "compressed"
+  }
+}
+
+resource "azurerm_data_factory_dataset_delimited_text" "ghcn_by_year_binary_source" {
+  name                = "ghcn_by_year_binary_source"
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
   compression_codec   = "gzip"
@@ -134,8 +145,8 @@ resource "azurerm_data_factory_dataset_delimited_text" "compressed_file_source" 
 
 }
 
-resource "azurerm_data_factory_dataset_delimited_text" "delimited_text_sink" {
-  name                = "delimited_text_sink"
+resource "azurerm_data_factory_dataset_delimited_text" "ghcn_by_year_delimited_text_sink" {
+  name                = "ghcn_by_year_delimited_text_sink"
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
   column_delimiter    = ","
@@ -147,8 +158,8 @@ resource "azurerm_data_factory_dataset_delimited_text" "delimited_text_sink" {
   }
 }
 
-resource "azurerm_data_factory_dataset_delimited_text" "delimited_text_source" {
-  name                = "delimited_text_source"
+resource "azurerm_data_factory_dataset_delimited_text" "ghcn_by_year_delimited_text_source" {
+  name                = "ghcn_by_year_delimited_text_source"
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
   column_delimiter    = ","
@@ -166,23 +177,66 @@ resource "azurerm_data_factory_dataset_delimited_text" "delimited_text_source" {
 
 }
 
-resource "azurerm_data_factory_dataset_binary" "binary_data_sink" {
-  name                = "binary_data_sink"
-  data_factory_id     = azurerm_data_factory.factory.id
-  linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
-
-  azure_blob_storage_location {
-    container = azurerm_storage_container.ghcn.name
-    path      = "compressed"
-  }
-}
-
-resource "azurerm_data_factory_dataset_cosmosdb_sqlapi" "staging_sink" {
-  name                = "staging_sink"
+resource "azurerm_data_factory_dataset_cosmosdb_sqlapi" "ghcn_by_year_cosmosdb_sink" {
+  name                = "ghcn_by_year_cosmosdb_sink"
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_cosmosdb.ghcn.name
 
-  collection_name = "staging"
+  collection_name = "ghcn"
+}
+
+resource "azurerm_data_factory_dataset_delimited_text" "ghcnd_stations_source" {
+  name                = "ghcnd_stations_source"
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_custom_service.ghcn.name
+  column_delimiter    = ","
+
+
+  http_server_location {
+    relative_url = "https://www.ncei.noaa.gov"
+    path         = "pub/data/ghcn/daily"
+    filename     = "ghcnd-stations.txt"
+  }
+}
+
+resource "azurerm_data_factory_dataset_delimited_text" "ghcnd_stations_delimited_text_sink" {
+  name                = "ghcnd_stations_delimited_text_sink"
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
+  column_delimiter    = ","
+  row_delimiter       = "\n"
+
+  azure_blob_storage_location {
+    container = azurerm_storage_container.ghcn.name
+    path      = "stations"
+  }
+}
+
+resource "azurerm_data_factory_dataset_delimited_text" "ghcnd_stations_delimited_text_source" {
+  name                = "ghcnd_stations_delimited_text_source"
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
+  column_delimiter    = ","
+
+  parameters = {
+    filename = ""
+  }
+
+  azure_blob_storage_location {
+    container                = azurerm_storage_container.ghcn.name
+    dynamic_filename_enabled = true
+    path                     = "stations"
+    filename                 = "@dataset().filename"
+  }
+
+}
+
+resource "azurerm_data_factory_dataset_cosmosdb_sqlapi" "ghcnd_stations_cosmosdb_sink" {
+  name                = "ghcnd_stations_cosmosdb_sink"
+  data_factory_id     = azurerm_data_factory.factory.id
+  linked_service_name = azurerm_data_factory_linked_service_cosmosdb.ghcn.name
+
+  collection_name = "ghcn"
 }
 
 ##################################################################
@@ -197,7 +251,7 @@ resource "azurerm_data_factory_data_flow" "example" {
     name = "source"
 
     dataset {
-      name = azurerm_data_factory_dataset_delimited_text.delimited_text_source.name
+      name = azurerm_data_factory_dataset_delimited_text.ghcn_by_year_delimited_text_source.name
     }
   }
 
@@ -215,7 +269,7 @@ resource "azurerm_data_factory_data_flow" "example" {
     name = "sink"
 
     dataset {
-      name = azurerm_data_factory_dataset_cosmosdb_sqlapi.staging_sink.name
+      name = azurerm_data_factory_dataset_cosmosdb_sqlapi.ghcn_by_year_cosmosdb_sink.name
     }
   }
 
