@@ -193,8 +193,8 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcnd_stations_source" {
 
 
   http_server_location {
-    relative_url = "https://www.ncei.noaa.gov"
-    path         = "pub/data/ghcn/daily"
+    relative_url = "pub/data/ghcn/daily/ghcnd-stations.txt"
+    path         = "pub/data/ghcn/daily/"
     filename     = "ghcnd-stations.txt"
   }
 }
@@ -312,4 +312,37 @@ resource "azurerm_data_factory_data_flow" "example" {
     "     skipDuplicateMapInputs: true,",
     "     skipDuplicateMapOutputs: true) ~> sink"
   ]
+}
+
+resource "azurerm_data_factory_data_flow" "ghcnd_stations" {
+  name            = "ghcnd_stations"
+  data_factory_id = azurerm_data_factory.factory.id
+
+  source {
+    name = "source"
+
+    dataset {
+      name = azurerm_data_factory_dataset_delimited_text.ghcnd_stations_delimited_text_source.name
+    }
+  }
+
+  transformation {
+    name = "filter1"
+  }
+  transformation {
+    name = "derivedColumn1"
+  }
+  transformation {
+    name = "select1"
+  }
+
+  sink {
+    name = "sink"
+
+    dataset {
+      name = azurerm_data_factory_dataset_cosmosdb_sqlapi.ghcnd_stations_cosmosdb_sink.name
+    }
+  }
+
+  script_lines = []
 }
