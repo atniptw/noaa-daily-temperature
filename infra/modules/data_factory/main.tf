@@ -243,8 +243,8 @@ resource "azurerm_data_factory_dataset_cosmosdb_sqlapi" "ghcnd_stations_cosmosdb
 #                         Data Flow                              #
 ##################################################################
 
-resource "azurerm_data_factory_data_flow" "example" {
-  name            = "cosmos"
+resource "azurerm_data_factory_data_flow" "ghcn_by_year" {
+  name            = "ghcn_by_year"
   data_factory_id = azurerm_data_factory.factory.id
 
   source {
