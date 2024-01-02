@@ -1,1 +1,313 @@
-[]
+[
+    {
+        "name": "Check For Updates",
+        "type": "AzureFunctionActivity",
+        "dependsOn": [],
+        "policy": {
+            "timeout": "0.12:00:00",
+            "retry": 0,
+            "retryIntervalInSeconds": 30,
+            "secureOutput": false,
+            "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+            "functionName": "UpdatedDatasets?limit=1",
+            "method": "GET",
+            "headers": {}
+        },
+        "linkedServiceName": {
+            "referenceName": "ghcn_function",
+            "type": "LinkedServiceReference"
+        }
+    },
+    {
+        "name": "ForEach1",
+        "type": "ForEach",
+        "dependsOn": [
+            {
+                "activity": "Check For Updates",
+                "dependencyConditions": [
+                    "Succeeded"
+                ]
+            }
+        ],
+        "userProperties": [],
+        "typeProperties": {
+            "items": {
+                "value": "@json(activity('Check For Updates').output.Response)",
+                "type": "Expression"
+            },
+            "activities": [
+                {
+                    "name": "Download From NOAA",
+                    "type": "Copy",
+                    "dependsOn": [],
+                    "policy": {
+                        "timeout": "0.12:00:00",
+                        "retry": 0,
+                        "retryIntervalInSeconds": 30,
+                        "secureOutput": false,
+                        "secureInput": false
+                    },
+                    "userProperties": [],
+                    "typeProperties": {
+                        "source": {
+                            "type": "HttpSource",
+                            "httpRequestTimeout": "00:01:40"
+                        },
+                        "sink": {
+                            "type": "BinarySink",
+                            "storeSettings": {
+                                "type": "AzureBlobStorageWriteSettings",
+                                "copyBehavior": "FlattenHierarchy"
+                            }
+                        },
+                        "enableStaging": false
+                    },
+                    "inputs": [
+                        {
+                            "referenceName": "ghcn_by_year_source",
+                            "type": "DatasetReference",
+                            "parameters": {
+                                "year": {
+                                    "value": "@item()",
+                                    "type": "Expression"
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "referenceName": "ghcn_by_year_binary_sink",
+                            "type": "DatasetReference",
+                            "parameters": {}
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "name": "Get Metadata1",
+        "type": "GetMetadata",
+        "dependsOn": [
+            {
+                "activity": "ForEach1",
+                "dependencyConditions": [
+                    "Succeeded"
+                ]
+            }
+        ],
+        "policy": {
+            "timeout": "0.12:00:00",
+            "retry": 0,
+            "retryIntervalInSeconds": 30,
+            "secureOutput": false,
+            "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+            "dataset": {
+                "referenceName": "ghcn_by_year_binary_sink",
+                "type": "DatasetReference",
+                "parameters": {}
+            },
+            "fieldList": [
+                "childItems"
+            ],
+            "storeSettings": {
+                "type": "AzureBlobStorageReadSettings",
+                "enablePartitionDiscovery": false,
+                "recursive": true
+            },
+            "formatSettings": {
+                "type": "BinaryReadSettings",
+                "compressionProperties": null
+            }
+        }
+    },
+    {
+        "name": "ForEach2",
+        "type": "ForEach",
+        "dependsOn": [
+            {
+                "activity": "Get Metadata1",
+                "dependencyConditions": [
+                    "Succeeded"
+                ]
+            }
+        ],
+        "userProperties": [],
+        "typeProperties": {
+            "items": {
+                "value": "@activity('Get Metadata1').output.childItems",
+                "type": "Expression"
+            },
+            "activities": [
+                {
+                    "name": "Extract",
+                    "type": "Copy",
+                    "dependsOn": [],
+                    "policy": {
+                        "timeout": "0.12:00:00",
+                        "retry": 0,
+                        "retryIntervalInSeconds": 30,
+                        "secureOutput": false,
+                        "secureInput": false
+                    },
+                    "userProperties": [],
+                    "typeProperties": {
+                        "source": {
+                            "type": "DelimitedTextSource",
+                            "storeSettings": {
+                                "type": "AzureBlobStorageReadSettings",
+                                "recursive": true,
+                                "enablePartitionDiscovery": false
+                            },
+                            "formatSettings": {
+                                "type": "DelimitedTextReadSettings",
+                                "compressionProperties": null
+                            }
+                        },
+                        "sink": {
+                            "type": "DelimitedTextSink",
+                            "storeSettings": {
+                                "type": "AzureBlobStorageWriteSettings",
+                                "copyBehavior": "FlattenHierarchy"
+                            },
+                            "formatSettings": {
+                                "type": "DelimitedTextWriteSettings",
+                                "quoteAllText": true,
+                                "fileExtension": ".csv"
+                            }
+                        },
+                        "enableStaging": false,
+                        "translator": {
+                            "type": "TabularTranslator",
+                            "typeConversion": true,
+                            "typeConversionSettings": {
+                                "allowDataTruncation": true,
+                                "treatBooleanAsNumber": false
+                            }
+                        }
+                    },
+                    "inputs": [
+                        {
+                            "referenceName": "ghcn_by_year_delimited_text_source",
+                            "type": "DatasetReference",
+                            "parameters": {
+                                "filename": {
+                                    "value": "@item().name",
+                                    "type": "Expression"
+                                }
+                            }
+                        }
+                    ],
+                    "outputs": [
+                        {
+                            "referenceName": "ghcn_by_year_delimited_text_sink",
+                            "type": "DatasetReference",
+                            "parameters": {}
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "name": "Get Metadata2",
+        "type": "GetMetadata",
+        "dependsOn": [
+            {
+                "activity": "ForEach2",
+                "dependencyConditions": [
+                    "Succeeded"
+                ]
+            }
+        ],
+        "policy": {
+            "timeout": "0.12:00:00",
+            "retry": 0,
+            "retryIntervalInSeconds": 30,
+            "secureOutput": false,
+            "secureInput": false
+        },
+        "userProperties": [],
+        "typeProperties": {
+            "dataset": {
+                "referenceName": "ghcn_by_year_delimited_text_sink",
+                "type": "DatasetReference",
+                "parameters": {}
+            },
+            "fieldList": [
+                "childItems"
+            ],
+            "storeSettings": {
+                "type": "AzureBlobStorageReadSettings",
+                "enablePartitionDiscovery": false,
+                "recursive": true
+            },
+            "formatSettings": {
+                "type": "DelimitedTextReadSettings",
+                "compressionProperties": null
+            }
+        }
+    },
+    {
+        "name": "ForEach3",
+        "type": "ForEach",
+        "dependsOn": [
+            {
+                "activity": "Get Metadata2",
+                "dependencyConditions": [
+                    "Succeeded"
+                ]
+            }
+        ],
+        "userProperties": [],
+        "typeProperties": {
+            "items": {
+                "value": "@activity('Get Metadata2').output.childItems",
+                "type": "Expression"
+            },
+            "activities": [
+                {
+                    "name": "Load To Staging",
+                    "type": "ExecuteDataFlow",
+                    "dependsOn": [],
+                    "policy": {
+                        "timeout": "0.12:00:00",
+                        "retry": 0,
+                        "retryIntervalInSeconds": 30,
+                        "secureOutput": false,
+                        "secureInput": false
+                    },
+                    "userProperties": [],
+                    "typeProperties": {
+                        "dataFlow": {
+                            "datasetParameters": {
+                                "sink": {},
+                                "source": {
+                                    "filename": {
+                                        "type": "Expression",
+                                        "value": "@item()"
+                                    }
+                                }
+                            },
+                            "parameters": {},
+                            "referenceName": "ghcn_by_year",
+                            "type": "DataFlowReference"
+                        },
+                        "staging": {},
+                        "compute": {
+                            "coreCount": 8,
+                            "computeType": "General"
+                        },
+                        "traceLevel": "Fine"
+                    }
+                }
+            ]
+        }
+    }
+]
