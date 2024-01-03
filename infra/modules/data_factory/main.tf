@@ -319,30 +319,33 @@ resource "azurerm_data_factory_data_flow" "ghcnd_stations" {
   data_factory_id = azurerm_data_factory.factory.id
 
   source {
-    name = "source"
+    name = "source1"
 
     dataset {
       name = azurerm_data_factory_dataset_delimited_text.ghcnd_stations_delimited_text_source.name
     }
   }
 
-  transformation {
-    name = "filter1"
-  }
-  transformation {
-    name = "derivedColumn1"
-  }
-  transformation {
-    name = "select1"
-  }
-
   sink {
-    name = "sink"
+    name = "sink1"
 
     dataset {
       name = azurerm_data_factory_dataset_cosmosdb_sqlapi.ghcnd_stations_cosmosdb_sink.name
     }
   }
 
-  script_lines = []
+  script_lines = [
+    "source(allowSchemaDrift: true,",
+    "     validateSchema: false,",
+    "     ignoreNoFilesFound: false) ~> source1",
+    "source1 sink(allowSchemaDrift: true,",
+    "     validateSchema: false,",
+    "     deletable:false,",
+    "     insertable:true,",
+    "     updateable:false,",
+    "     upsertable:false,",
+    "     format: 'document',",
+    "     skipDuplicateMapInputs: true,",
+    "     skipDuplicateMapOutputs: true) ~> sink1"
+  ]
 }
