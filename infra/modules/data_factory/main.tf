@@ -31,7 +31,13 @@ resource "azurerm_role_assignment" "example" {
 }
 
 resource "azurerm_storage_container" "ghcn" {
-  name                  = "ghcn"
+  name                  = "ghcn_by_year"
+  storage_account_name  = module.storage_account.name
+  container_access_type = "private"
+}
+
+resource "azurerm_storage_container" "stations" {
+  name                  = "ghcnd_stations"
   storage_account_name  = module.storage_account.name
   container_access_type = "private"
 }
@@ -202,8 +208,8 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcnd_stations_delimited
   row_delimiter       = "\n"
 
   azure_blob_storage_location {
-    container = azurerm_storage_container.ghcn.name
-    path      = "stations"
+    container = azurerm_storage_container.stations.name
+    path      = ""
   }
 }
 
@@ -213,8 +219,8 @@ resource "azurerm_data_factory_dataset_binary" "ghcnd_stations_sink" {
   linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.ghcn.name
 
   azure_blob_storage_location {
-    container = azurerm_storage_container.ghcn.name
-    path      = "stations"
+    container = azurerm_storage_container.stations.name
+    path      = ""
   }
 }
 
