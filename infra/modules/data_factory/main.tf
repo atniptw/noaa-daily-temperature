@@ -73,7 +73,7 @@ resource "azurerm_data_factory_linked_service_cosmosdb" "ghcn" {
   name              = "ghcn_cosmosdb"
   data_factory_id   = azurerm_data_factory.factory.id
   connection_string = var.cosmos_connection_string
-  database          = "ghcn"
+  database          = var.cosmosdb_name
 }
 
 resource "azurerm_data_factory_linked_custom_service" "ghcn" {
@@ -242,7 +242,7 @@ resource "azurerm_data_factory_dataset_cosmosdb_sqlapi" "ghcnd_stations_cosmosdb
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_service_cosmosdb.ghcn.name
 
-  collection_name = "ghcn"
+  collection_name = "stations"
 }
 
 ##################################################################

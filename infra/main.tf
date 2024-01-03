@@ -107,7 +107,7 @@ module "data_factory" {
 
   location                 = data.azurerm_resource_group.rg.location
   resource_group_name      = data.azurerm_resource_group.rg.name
-  cosmosdb_name            = azurerm_cosmosdb_account.cosmos.name
+  cosmosdb_name            = module.staging_db.name
   cosmos_connection_string = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
   function_app_hostname    = module.function_app.hostname
   function_app_key         = module.function_app.function_key
