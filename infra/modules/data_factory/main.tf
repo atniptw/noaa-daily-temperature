@@ -235,7 +235,6 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcnd_stations_delimited
   azure_blob_storage_location {
     container                = azurerm_storage_container.ghcn.name
     dynamic_filename_enabled = true
-    path                     = "stations"
     filename                 = "@dataset().filename"
   }
 
