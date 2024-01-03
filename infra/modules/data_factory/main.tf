@@ -190,6 +190,7 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcnd_stations_source" {
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_custom_service.ghcn.name
   column_delimiter    = ","
+  row_delimiter       = "\\r,\\n"
 
 
   http_server_location {
