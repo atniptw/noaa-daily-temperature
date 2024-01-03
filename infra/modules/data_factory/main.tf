@@ -185,21 +185,8 @@ resource "azurerm_data_factory_dataset_cosmosdb_sqlapi" "ghcn_by_year_cosmosdb_s
   collection_name = "ghcn"
 }
 
-resource "azurerm_data_factory_dataset_delimited_text" "ghcnd_stations_source" {
-  name                = "ghcnd_stations_source"
-  data_factory_id     = azurerm_data_factory.factory.id
-  linked_service_name = azurerm_data_factory_linked_custom_service.ghcn.name
-  column_delimiter    = ","
-
-  http_server_location {
-    relative_url = "pub/data/ghcn/daily/ghcnd-stations.txt"
-    path         = "pub/data/ghcn/daily/"
-    filename     = "ghcnd-stations.txt"
-  }
-}
-
 resource "azurerm_data_factory_dataset_http" "ghcnd_stations_source" {
-  name                = "ghcnd_stations_source2"
+  name                = "ghcnd_stations_source"
   data_factory_id     = azurerm_data_factory.factory.id
   linked_service_name = azurerm_data_factory_linked_custom_service.ghcn.name
 

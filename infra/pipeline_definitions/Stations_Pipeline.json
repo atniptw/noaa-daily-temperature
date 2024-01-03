@@ -13,37 +13,17 @@
         "userProperties": [],
         "typeProperties": {
             "source": {
-                "type": "DelimitedTextSource",
-                "storeSettings": {
-                    "type": "HttpReadSettings",
-                    "requestMethod": "GET"
-                },
-                "formatSettings": {
-                    "type": "DelimitedTextReadSettings",
-                    "compressionProperties": null
-                }
+                "type": "HttpSource",
+                "httpRequestTimeout": "00:01:40"
             },
             "sink": {
-                "type": "DelimitedTextSink",
+                "type": "BinarySink",
                 "storeSettings": {
                     "type": "AzureBlobStorageWriteSettings",
                     "copyBehavior": "FlattenHierarchy"
-                },
-                "formatSettings": {
-                    "type": "DelimitedTextWriteSettings",
-                    "quoteAllText": true,
-                    "fileExtension": ".csv"
                 }
             },
-            "enableStaging": false,
-            "translator": {
-                "type": "TabularTranslator",
-                "typeConversion": true,
-                "typeConversionSettings": {
-                    "allowDataTruncation": true,
-                    "treatBooleanAsNumber": false
-                }
-            }
+            "enableStaging": false
         },
         "inputs": [
             {
@@ -54,7 +34,7 @@
         ],
         "outputs": [
             {
-                "referenceName": "ghcnd_stations_delimited_text_sink",
+                "referenceName": "ghcnd_stations_sink",
                 "type": "DatasetReference",
                 "parameters": {}
             }
@@ -90,6 +70,7 @@
             ],
             "storeSettings": {
                 "type": "AzureBlobStorageReadSettings",
+                "recursive": true,
                 "enablePartitionDiscovery": false
             },
             "formatSettings": {
@@ -130,6 +111,8 @@
                     "userProperties": [],
                     "typeProperties": {
                         "dataFlow": {
+                            "referenceName": "ghcnd_stations",
+                            "type": "DataFlowReference",
                             "datasetParameters": {
                                 "sink1": {},
                                 "source1": {
@@ -139,9 +122,7 @@
                                     }
                                 }
                             },
-                            "parameters": {},
-                            "referenceName": "ghcnd_stations",
-                            "type": "DataFlowReference"
+                            "parameters": {}
                         },
                         "staging": {},
                         "compute": {
