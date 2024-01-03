@@ -191,7 +191,6 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcnd_stations_source" {
   linked_service_name = azurerm_data_factory_linked_custom_service.ghcn.name
   column_delimiter    = ","
 
-
   http_server_location {
     relative_url = "pub/data/ghcn/daily/ghcnd-stations.txt"
     path         = "pub/data/ghcn/daily/"
