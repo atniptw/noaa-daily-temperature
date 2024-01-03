@@ -31,13 +31,13 @@ resource "azurerm_role_assignment" "example" {
 }
 
 resource "azurerm_storage_container" "ghcn" {
-  name                  = "ghcn_by_year"
+  name                  = "ghcn-by-year"
   storage_account_name  = module.storage_account.name
   container_access_type = "private"
 }
 
 resource "azurerm_storage_container" "stations" {
-  name                  = "ghcnd_stations"
+  name                  = "ghcnd-stations"
   storage_account_name  = module.storage_account.name
   container_access_type = "private"
 }
