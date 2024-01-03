@@ -209,7 +209,6 @@ resource "azurerm_data_factory_dataset_delimited_text" "ghcnd_stations_delimited
 
   azure_blob_storage_location {
     container = azurerm_storage_container.stations.name
-    path      = ""
   }
 }
 
@@ -220,7 +219,6 @@ resource "azurerm_data_factory_dataset_binary" "ghcnd_stations_sink" {
 
   azure_blob_storage_location {
     container = azurerm_storage_container.stations.name
-    path      = ""
   }
 }
 
