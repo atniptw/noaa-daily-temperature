@@ -343,11 +343,23 @@ resource "azurerm_data_factory_data_flow" "ghcnd_stations" {
     }
   }
 
+  transformation {
+    name = "select1"
+  }
+
   script_lines = [
-    "source(allowSchemaDrift: true,",
+    "source(output(",
+    "          Column_1 as string",
+    "     ),",
+    "     allowSchemaDrift: true,",
     "     validateSchema: false,",
     "     ignoreNoFilesFound: false) ~> source1",
-    "source1 sink(allowSchemaDrift: true,",
+    "source1 select(mapColumn(",
+    "          record = Column_1",
+    "     ),",
+    "     skipDuplicateMapInputs: true,",
+    "     skipDuplicateMapOutputs: true) ~> select1",
+    "select1 sink(allowSchemaDrift: true,",
     "     validateSchema: false,",
     "     deletable:false,",
     "     insertable:true,",
