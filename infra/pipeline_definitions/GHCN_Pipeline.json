@@ -194,7 +194,7 @@
                     },
                     "inputs": [
                         {
-                            "referenceName": "ghcn_by_year_delimited_text_source",
+                            "referenceName": "ghcn_by_year_binary_source",
                             "type": "DatasetReference",
                             "parameters": {
                                 "filename": {
