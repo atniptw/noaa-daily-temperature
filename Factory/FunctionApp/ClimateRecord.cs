@@ -16,7 +16,7 @@ public class ClimateRecord
     private static CosmosClient InitializeCosmosClient()
     {
         var uri = "https://devcosmosnoaa01.documents.azure.com:443";
-        var authKey = "UgaghEjsiczVJRyJxrwz3Fwz7hAR3LCUDReUmoVQXs2OHX6MJ3Bk6yhKh4dNrOHkddIygOdakVBnACDblcOn1A==";
+        var authKey = "";
 
         return new CosmosClient(uri, authKey);
     }
