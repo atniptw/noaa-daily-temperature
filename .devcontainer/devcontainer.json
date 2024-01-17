@@ -9,8 +9,8 @@
 		// 	"installUsingApt": true,
 		// 	"version": "lts"
 		// },
-		// "ghcr.io/devcontainers/features/azure-cli:1": {
-		// },
+		"ghcr.io/devcontainers/features/azure-cli:1": {
+		}
 		// "ghcr.io/devcontainers/features/terraform:1": {
 		// 	"installTerraformDocs": true,
 		// 	"version": "latest",

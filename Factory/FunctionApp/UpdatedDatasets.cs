@@ -53,6 +53,7 @@ public class UpdatedDatasets(ILoggerFactory loggerFactory)
 
         if (limit > 0)
         {
+            filteredResults.Reverse();
             filteredResults = filteredResults.GetRange(0, limit);
         }
 

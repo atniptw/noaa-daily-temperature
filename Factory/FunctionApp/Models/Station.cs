@@ -5,24 +5,24 @@ namespace FunctionApp;
 
 public class Station
 {
-    [JsonProperty(nameof(id))]
+    [JsonProperty(PropertyName = "id")]
     public required string id { get; set; }
 
-    [JsonProperty("location")]
-    public required Point Location { get; set; }
+    [JsonProperty(PropertyName = "location")]
+    public required Point location { get; set; }
 
-    [JsonProperty("elevation")]
-    public double Elevation { get; set; }
+    [JsonProperty(PropertyName = "elevation")]
+    public double elevation { get; set; }
 
-    [JsonProperty("state")]
-    public required string State { get; set; }
+    [JsonProperty(PropertyName = "state")]
+    public required string state { get; set; }
 
-    [JsonProperty("name")]
-    public required string Name { get; set; }
+    [JsonProperty(PropertyName = "name")]
+    public required string name { get; set; }
 
-    [JsonProperty("flags")]
-    public required string[] Flags { get; set; }
+    [JsonProperty(PropertyName = "flags")]
+    public required string[] flags { get; set; }
 
-    [JsonProperty("wmoId")]
-    public required string WMOId { get; set; }
+    [JsonProperty(PropertyName = "wmoId")]
+    public required string wmoId { get; set; }
 }

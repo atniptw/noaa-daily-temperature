@@ -33,12 +33,12 @@ public class StationParser
         return new Station
         {
             id = id,
-            Location = new Point(lon, lat),
-            Elevation = elevation,
-            State = state,
-            Name = name,
-            Flags = [.. flags],
-            WMOId = wmoId
+            location = new Point(lon, lat),
+            elevation = elevation,
+            state = state,
+            name = name,
+            flags = [.. flags],
+            wmoId = wmoId
         };
     }
 }

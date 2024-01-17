@@ -4,27 +4,45 @@ namespace FunctionApp;
 
 public class Climate
 {
+    [JsonProperty("id")]
+    public required string Id { get; set; }
+
     [JsonProperty("station")]
     public required Station Station { get; set; }
 
     [JsonProperty("date")]
     public DateOnly Date { get; set; }
 
-    [JsonProperty("recordType")]
-    public required string RecordType { get; set; }
+    [JsonProperty("PRCP")]
+    public Reading? Precipitation { get; set; }
 
+    [JsonProperty("SNOW")]
+    public Reading? Snowfall { get; set; }
+
+    [JsonProperty("SNWD")]
+    public Reading? SnowDepth { get; set; }
+
+    [JsonProperty("TMAX")]
+    public Reading? MaxTemperature { get; set; }
+
+    [JsonProperty("TMIN")]
+    public Reading? MinTemperature { get; set; }
+}
+
+public class Reading
+{
     [JsonProperty("recordValue")]
     public required double RecordValue { get; set; }
 
     [JsonProperty("measurementFlag")]
-    public char? MeasurementFlag { get; set; }
+    public string? MeasurementFlag { get; set; }
 
     [JsonProperty("qualityFlag")]
-    public char? QualityFlag { get; set; }
+    public string? QualityFlag { get; set; }
 
     [JsonProperty("sourceFlag")]
-    public char? SourceFlag { get; set; }
+    public string? SourceFlag { get; set; }
 
     [JsonProperty("observationTime")]
-    public required string ObservationTime { get; set; }
+    public string? ObservationTime { get; set; }
 }
