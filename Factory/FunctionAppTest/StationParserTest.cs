@@ -30,21 +30,21 @@ public class StationParserTest
         var expected = new Station
         {
             id = id,
-            Location = new Point(double.Parse(lon, CultureInfo.InvariantCulture), double.Parse(lat, CultureInfo.InvariantCulture)),
-            Elevation = double.Parse(elevation, CultureInfo.InvariantCulture),
-            State = state,
-            Name = name,
-            Flags = [.. emptyRemoved],
-            WMOId = wmoId
+            location = new Point(double.Parse(lon, CultureInfo.InvariantCulture), double.Parse(lat, CultureInfo.InvariantCulture)),
+            elevation = double.Parse(elevation, CultureInfo.InvariantCulture),
+            state = state,
+            name = name,
+            flags = [.. emptyRemoved],
+            wmoId = wmoId
         };
         var result = StationParser.ParseRecord(input);
 
         Assert.AreEqual(expected.id, result.id);
-        Assert.AreEqual(expected.Location, result.Location);
-        Assert.AreEqual(expected.Elevation, result.Elevation);
-        Assert.AreEqual(expected.State, result.State);
-        Assert.AreEqual(expected.Name, result.Name);
-        CollectionAssert.AreEquivalent(expected.Flags, result.Flags);
-        Assert.AreEqual(expected.WMOId, result.WMOId);
+        Assert.AreEqual(expected.location, result.location);
+        Assert.AreEqual(expected.elevation, result.elevation);
+        Assert.AreEqual(expected.state, result.state);
+        Assert.AreEqual(expected.name, result.name);
+        CollectionAssert.AreEquivalent(expected.flags, result.flags);
+        Assert.AreEqual(expected.wmoId, result.wmoId);
     }
 }
