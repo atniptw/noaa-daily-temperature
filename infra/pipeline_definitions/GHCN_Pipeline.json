@@ -22,7 +22,7 @@
         }
     },
     {
-        "name": "ForEach1",
+        "name": "Download",
         "type": "ForEach",
         "dependsOn": [
             {
@@ -34,7 +34,7 @@
         ],
         "userProperties": [],
         "typeProperties": {
-            "items": {
+                        "items": {
                 "value": "@json(activity('Check For Updates').output.Response)",
                 "type": "Expression"
             },
@@ -93,7 +93,7 @@
         "type": "GetMetadata",
         "dependsOn": [
             {
-                "activity": "ForEach1",
+                "activity": "Download",
                 "dependencyConditions": [
                     "Succeeded"
                 ]
@@ -128,7 +128,7 @@
         }
     },
     {
-        "name": "ForEach2",
+        "name": "Extract",
         "type": "ForEach",
         "dependsOn": [
             {
@@ -146,7 +146,7 @@
             },
             "activities": [
                 {
-                    "name": "Extract",
+                    "name": "Extract File",
                     "type": "Copy",
                     "dependsOn": [],
                     "policy": {
@@ -220,7 +220,7 @@
         "type": "GetMetadata",
         "dependsOn": [
             {
-                "activity": "ForEach2",
+                "activity": "Extract",
                 "dependencyConditions": [
                     "Succeeded"
                 ]
@@ -255,7 +255,7 @@
         }
     },
     {
-        "name": "ForEach3",
+        "name": "Load",
         "type": "ForEach",
         "dependsOn": [
             {
@@ -273,7 +273,7 @@
             },
             "activities": [
                 {
-                    "name": "Load To Staging",
+                    "name": "Load To Database",
                     "type": "ExecuteDataFlow",
                     "dependsOn": [],
                     "policy": {
@@ -287,13 +287,14 @@
                     "typeProperties": {
                         "dataFlow": {
                             "datasetParameters": {
-                                "sink": {},
-                                "source": {
+                                "CosmosDB": {},
+                                "ReadingSource": {
                                     "filename": {
                                         "type": "Expression",
                                         "value": "@item()"
                                     }
-                                }
+                                },
+                                "StationSource": {}
                             },
                             "parameters": {},
                             "referenceName": "ghcn_by_year",

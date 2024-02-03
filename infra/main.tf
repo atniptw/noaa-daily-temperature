@@ -110,10 +110,3 @@ resource "azurerm_data_factory_pipeline" "ghcn" {
 
   activities_json = templatefile("${path.module}/pipeline_definitions/GHCN_Pipeline.json", {})
 }
-
-resource "azurerm_data_factory_pipeline" "stations" {
-  name            = "stations"
-  data_factory_id = module.data_factory.id
-
-  activities_json = templatefile("${path.module}/pipeline_definitions/Stations_Pipeline.json", {})
-}

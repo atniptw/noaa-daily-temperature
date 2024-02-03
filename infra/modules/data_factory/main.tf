@@ -50,6 +50,7 @@ resource "azurerm_storage_management_policy" "example" {
     enabled = true
     filters {
       blob_types = ["blockBlob"]
+      prefix_match = [ "ghcn-by-year/" ]
     }
     actions {
       base_blob {
@@ -257,7 +258,7 @@ resource "azurerm_data_factory_data_flow" "ghcn_by_year" {
   data_factory_id = azurerm_data_factory.factory.id
 
   source {
-    name = "source"
+    name = "ReadingSource"
 
     dataset {
       name = azurerm_data_factory_dataset_delimited_text.ghcn_by_year_delimited_text_source.name
@@ -265,7 +266,7 @@ resource "azurerm_data_factory_data_flow" "ghcn_by_year" {
   }
 
   source {
-    name = "source1"
+    name = "StationSource"
 
     dataset {
       name = "Json1"
@@ -273,114 +274,114 @@ resource "azurerm_data_factory_data_flow" "ghcn_by_year" {
   }
 
   transformation {
-    name = "filter1"
+    name = "RemoveNullValues"
   }
   transformation {
-    name = "select1"
+    name = "RenameColumns"
   }
   transformation {
-    name = "aggregate1"
+    name = "AggregateRecords"
   }
   transformation {
-    name = "derivedColumn2"
+    name = "ConvertToDecimalValue"
   }
   transformation {
-    name = "derivedColumn3"
+    name = "AddCombinedField"
   }
   transformation {
-    name = "join1"
+    name = "JoinReadingsWithStations"
   }
   transformation {
-    name = "derivedColumn4"
+    name = "AddKnownId"
   }
   transformation {
-    name = "select2"
+    name = "FinalFieldMapping"
   }
 
   sink {
-    name = "sink"
+    name = "CosmosDB"
 
     dataset {
       name = azurerm_data_factory_dataset_cosmosdb_sqlapi.ghcn_by_year_cosmosdb_sink.name
     }
   }
 
-  script_lines = [
-    "source(output(",
-    "          Column_1 as string,",
-    "          Column_2 as string,",
-    "          Column_3 as string,",
-    "          Column_4 as string,",
-    "          Column_5 as string,",
-    "          Column_6 as string,",
-    "          Column_7 as string,",
-    "          Column_8 as string",
-    "     ),",
-    "     allowSchemaDrift: true,",
-    "     validateSchema: false,",
-    "     ignoreNoFilesFound: false) ~> source",
-    "source(output(",
-    "          id as string,",
-    "          name as string,",
-    "          location as (type as string, coordinates as double[]),",
-    "          elevation as double,",
-    "          state as string,",
-    "          flags as string[],",
-    "          wmoId as string",
-    "     ),",
-    "     allowSchemaDrift: false,",
-    "     validateSchema: false,",
-    "     ignoreNoFilesFound: false,",
-    "     documentForm: 'documentPerLine') ~> source1",
-    "source filter(not(isNull(Column_1)) && not(isNull(Column_2)) && not(isNull(Column_3)) && not(isNull(Column_4))) ~> filter1",
-    "filter1 select(mapColumn(",
-    "          stationId = Column_1,",
-    "          date = Column_2,",
-    "          recordType = Column_3,",
-    "          value = Column_4,",
-    "          measurementFlag = Column_5,",
-    "          qualityFlag = Column_6,",
-    "          sourceFlag = Column_7,",
-    "          observationTime = Column_8",
-    "     ),",
-    "     skipDuplicateMapInputs: true,",
-    "     skipDuplicateMapOutputs: true) ~> select1",
-    "derivedColumn3 aggregate(groupBy(stationId,",
-    "          date),",
-    "     readings = collect(temp)) ~> aggregate1",
-    "select1 derive(value = divide(toInteger(value), 10)) ~> derivedColumn2",
-    "derivedColumn2 derive(temp = @(recordType,value,measurementFlag,qualityFlag,sourceFlag,observationTime)) ~> derivedColumn3",
-    "aggregate1, source1 join(stationId == id,",
-    "     joinType:'inner',",
-    "     matchType:'exact',",
-    "     ignoreSpaces: false,",
-    "     broadcast: 'auto')~> join1",
-    "join1 derive(newId = concat(stationId,\"+\",date)) ~> derivedColumn4",
-    "derivedColumn4 select(mapColumn(",
-    "          id = newId,",
-    "          stationId,",
-    "          date,",
-    "          readings,",
-    "          name,",
-    "          location,",
-    "          elevation,",
-    "          state,",
-    "          flags,",
-    "          wmoId",
-    "     ),",
-    "     skipDuplicateMapInputs: true,",
-    "     skipDuplicateMapOutputs: true) ~> select2",
-    "select2 sink(allowSchemaDrift: true,",
-    "     validateSchema: false,",
-    "     deletable:false,",
-    "     insertable:true,",
-    "     updateable:false,",
-    "     upsertable:false,",
-    "     format: 'document',",
-    "     throughput: 400,",
-    "     skipDuplicateMapInputs: true,",
-    "     skipDuplicateMapOutputs: true) ~> sink"
-  ]
+script_lines = [
+                "source(output(",
+                "          Column_1 as string,",
+                "          Column_2 as string,",
+                "          Column_3 as string,",
+                "          Column_4 as string,",
+                "          Column_5 as string,",
+                "          Column_6 as string,",
+                "          Column_7 as string,",
+                "          Column_8 as string",
+                "     ),",
+                "     allowSchemaDrift: true,",
+                "     validateSchema: false,",
+                "     ignoreNoFilesFound: false) ~> ReadingSource",
+                "source(output(",
+                "          id as string,",
+                "          name as string,",
+                "          location as (type as string, coordinates as double[]),",
+                "          elevation as double,",
+                "          state as string,",
+                "          flags as string[],",
+                "          wmoId as string",
+                "     ),",
+                "     allowSchemaDrift: false,",
+                "     validateSchema: false,",
+                "     ignoreNoFilesFound: false,",
+                "     documentForm: 'documentPerLine') ~> StationSource",
+                "ReadingSource filter(not(isNull(Column_1)) && not(isNull(Column_2)) && not(isNull(Column_3)) && not(isNull(Column_4))) ~> RemoveNullValues",
+                "RemoveNullValues select(mapColumn(",
+                "          stationId = Column_1,",
+                "          date = Column_2,",
+                "          recordType = Column_3,",
+                "          value = Column_4,",
+                "          measurementFlag = Column_5,",
+                "          qualityFlag = Column_6,",
+                "          sourceFlag = Column_7,",
+                "          observationTime = Column_8",
+                "     ),",
+                "     skipDuplicateMapInputs: true,",
+                "     skipDuplicateMapOutputs: true) ~> RenameColumns",
+                "AddCombinedField aggregate(groupBy(stationId,",
+                "          date),",
+                "     readings = collect(temp)) ~> AggregateRecords",
+                "RenameColumns derive(value = divide(toInteger(value), 10)) ~> ConvertToDecimalValue",
+                "ConvertToDecimalValue derive(temp = @(recordType,value,measurementFlag,qualityFlag,sourceFlag,observationTime)) ~> AddCombinedField",
+                "AggregateRecords, StationSource join(stationId == id,",
+                "     joinType:'inner',",
+                "     matchType:'exact',",
+                "     ignoreSpaces: false,",
+                "     broadcast: 'auto')~> JoinReadingsWithStations",
+                "JoinReadingsWithStations derive(newId = concat(stationId,\"+\",date)) ~> AddKnownId",
+                "AddKnownId select(mapColumn(",
+                "          id = newId,",
+                "          stationId,",
+                "          date,",
+                "          readings,",
+                "          name,",
+                "          location,",
+                "          elevation,",
+                "          state,",
+                "          flags,",
+                "          wmoId",
+                "     ),",
+                "     skipDuplicateMapInputs: true,",
+                "     skipDuplicateMapOutputs: true) ~> FinalFieldMapping",
+                "FinalFieldMapping sink(allowSchemaDrift: true,",
+                "     validateSchema: false,",
+                "     deletable:false,",
+                "     insertable:true,",
+                "     updateable:false,",
+                "     upsertable:false,",
+                "     format: 'document',",
+                "     throughput: 400,",
+                "     skipDuplicateMapInputs: true,",
+                "     skipDuplicateMapOutputs: true) ~> CosmosDB"
+            ]
 }
 
 resource "azurerm_data_factory_data_flow" "ghcnd_stations" {
