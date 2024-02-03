@@ -78,16 +78,7 @@ resource "azurerm_cosmosdb_account" "cosmos" {
   }
 }
 
-module "staging_db" {
-  source = "./modules/cosmos_db"
-
-  resource_group_name   = data.azurerm_resource_group.rg.name
-  cosmosdb_account_name = azurerm_cosmosdb_account.cosmos.name
-  db_name               = "${var.environment}-staging"
-  ttl                   = 3600
-}
-
-module "production_db" {
+module "db" {
   source = "./modules/cosmos_db"
 
   resource_group_name   = data.azurerm_resource_group.rg.name
@@ -107,7 +98,7 @@ module "data_factory" {
 
   location                 = data.azurerm_resource_group.rg.location
   resource_group_name      = data.azurerm_resource_group.rg.name
-  cosmosdb_name            = module.staging_db.name
+  cosmosdb_name            = module.db.name
   cosmos_connection_string = azurerm_cosmosdb_account.cosmos.primary_sql_connection_string
   function_app_hostname    = module.function_app.hostname
   function_app_key         = module.function_app.function_key

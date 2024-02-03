@@ -264,14 +264,37 @@ resource "azurerm_data_factory_data_flow" "ghcn_by_year" {
     }
   }
 
+  source {
+    name = "source1"
+
+    dataset {
+      name = "Json1"
+    }
+  }
+
   transformation {
     name = "filter1"
   }
   transformation {
-    name = "derivedColumn1"
+    name = "select1"
   }
   transformation {
-    name = "select1"
+    name = "aggregate1"
+  }
+  transformation {
+    name = "derivedColumn2"
+  }
+  transformation {
+    name = "derivedColumn3"
+  }
+  transformation {
+    name = "join1"
+  }
+  transformation {
+    name = "derivedColumn4"
+  }
+  transformation {
+    name = "select2"
   }
 
   sink {
@@ -296,21 +319,58 @@ resource "azurerm_data_factory_data_flow" "ghcn_by_year" {
     "     allowSchemaDrift: true,",
     "     validateSchema: false,",
     "     ignoreNoFilesFound: false) ~> source",
+    "source(output(",
+    "          id as string,",
+    "          name as string,",
+    "          location as (type as string, coordinates as double[]),",
+    "          elevation as double,",
+    "          state as string,",
+    "          flags as string[],",
+    "          wmoId as string",
+    "     ),",
+    "     allowSchemaDrift: false,",
+    "     validateSchema: false,",
+    "     ignoreNoFilesFound: false,",
+    "     documentForm: 'documentPerLine') ~> source1",
     "source filter(not(isNull(Column_1)) && not(isNull(Column_2)) && not(isNull(Column_3)) && not(isNull(Column_4))) ~> filter1",
-    "filter1 derive(RecordValue = divide(toInteger(Column_4), 10)) ~> derivedColumn1",
-    "derivedColumn1 select(mapColumn(",
-    "          StationId = Column_1,",
-    "          Date = Column_2,",
-    "          RecordType = Column_3,",
-    "          RecordValue,",
-    "          MeasurementFlag = Column_5,",
-    "          QualityFlag = Column_6,",
-    "          SourceFlag = Column_7,",
-    "          ObservationTime = Column_8",
+    "filter1 select(mapColumn(",
+    "          stationId = Column_1,",
+    "          date = Column_2,",
+    "          recordType = Column_3,",
+    "          value = Column_4,",
+    "          measurementFlag = Column_5,",
+    "          qualityFlag = Column_6,",
+    "          sourceFlag = Column_7,",
+    "          observationTime = Column_8",
     "     ),",
     "     skipDuplicateMapInputs: true,",
     "     skipDuplicateMapOutputs: true) ~> select1",
-    "select1 sink(allowSchemaDrift: true,",
+    "derivedColumn3 aggregate(groupBy(stationId,",
+    "          date),",
+    "     readings = collect(temp)) ~> aggregate1",
+    "select1 derive(value = divide(toInteger(value), 10)) ~> derivedColumn2",
+    "derivedColumn2 derive(temp = @(recordType,value,measurementFlag,qualityFlag,sourceFlag,observationTime)) ~> derivedColumn3",
+    "aggregate1, source1 join(stationId == id,",
+    "     joinType:'inner',",
+    "     matchType:'exact',",
+    "     ignoreSpaces: false,",
+    "     broadcast: 'auto')~> join1",
+    "join1 derive(newId = concat(stationId,\"+\",date)) ~> derivedColumn4",
+    "derivedColumn4 select(mapColumn(",
+    "          id = newId,",
+    "          stationId,",
+    "          date,",
+    "          readings,",
+    "          name,",
+    "          location,",
+    "          elevation,",
+    "          state,",
+    "          flags,",
+    "          wmoId",
+    "     ),",
+    "     skipDuplicateMapInputs: true,",
+    "     skipDuplicateMapOutputs: true) ~> select2",
+    "select2 sink(allowSchemaDrift: true,",
     "     validateSchema: false,",
     "     deletable:false,",
     "     insertable:true,",
