@@ -35,7 +35,10 @@
 			"extensions": [
 				"ms-azuretools.vscode-azurefunctions",
 				"ms-dotnettools.csharp",
-				"ms-dotnettools.csdevkit"
+				"ms-dotnettools.csdevkit",
+				"ms-dotnettools.vscode-dotnet-runtime",
+				"ms-vscode.azurecli",
+				"ms-vscode.azure-account"
 			]
 		}
 	}

@@ -28,15 +28,15 @@ public class StationParserTest
         var flagsSplit = flags.Split(',');
         var emptyRemoved = flagsSplit.Where(x => !string.IsNullOrEmpty(x)).ToArray();
         var expected = new Station
-        {
-            id = id,
-            location = new Point(double.Parse(lon, CultureInfo.InvariantCulture), double.Parse(lat, CultureInfo.InvariantCulture)),
-            elevation = double.Parse(elevation, CultureInfo.InvariantCulture),
-            state = state,
-            name = name,
-            flags = [.. emptyRemoved],
-            wmoId = wmoId
-        };
+        (
+            id,
+            name,
+            new Point(double.Parse(lon, CultureInfo.InvariantCulture), double.Parse(lat, CultureInfo.InvariantCulture)),
+            double.Parse(elevation, CultureInfo.InvariantCulture),
+            state,
+            [.. emptyRemoved],
+            wmoId
+        );
         var result = StationParser.ParseRecord(input);
 
         Assert.AreEqual(expected.id, result.id);

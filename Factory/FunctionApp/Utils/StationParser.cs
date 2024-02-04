@@ -30,15 +30,6 @@ public class StationParser
             flags.Add(hcnORcrn);
         }
 
-        return new Station
-        {
-            id = id,
-            location = new Point(lon, lat),
-            elevation = elevation,
-            state = state,
-            name = name,
-            flags = [.. flags],
-            wmoId = wmoId
-        };
+        return new Station(id, name, new CosmosPoint("Point", [lon, lat]), elevation, state, [.. flags], wmoId);
     }
 }
