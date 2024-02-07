@@ -31,5 +31,9 @@ resource "azurerm_cosmosdb_sql_container" "ghcn" {
     spatial_index {
       path = "/location/*"
     }
+
+    excluded_path {
+      path = "/*"
+    }
   }
 }
