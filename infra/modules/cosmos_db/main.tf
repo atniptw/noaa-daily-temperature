@@ -21,11 +21,11 @@ resource "azurerm_cosmosdb_sql_container" "ghcn" {
     indexing_mode = "consistent"
 
     included_path {
-      path = "/date"
+      path = "/date/?"
     }
 
     included_path {
-      path = "/stationId"
+      path = "/stationId/?"
     }
 
     spatial_index {
